@@ -19,6 +19,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 
+import static android.R.attr.key;
+
 public class ConnectivityReceiver
         extends BroadcastReceiver {
 
@@ -38,20 +40,22 @@ public class ConnectivityReceiver
         sb = new StringBuilder();
         sb.append(System.getProperty("line.separator"));
 
-        if (!intent.getAction().equals("android.net.conn.CONNECTIVITY_CHANGE")){
-            Log.v(tag, "Action: " + intent.getAction());
-            sb.append("Action: " + intent.getAction()).append(System.getProperty("line.separator"));
-            Log.v(tag, "component: " + intent.getComponent());
-            Bundle extras = intent.getExtras();
-            if (extras != null) {
-                for (String key: extras.keySet()) {
+        Bundle extras = intent.getExtras();
+
+        if (intent.getAction().equals("android.net.wifi.STATE_CHANGE")) {
+            if (((NetworkInfo) extras.get("networkInfo")).getState().toString().equals("CONNECTED")) {
+                Log.v(tag, "Action: " + intent.getAction());
+                sb.append("Action: " + intent.getAction()).append(System.getProperty("line.separator"));
+                Log.v(tag, "component: " + intent.getComponent());
+                if (extras != null) {
                     Log.v(tag, key + ": " +
-                            extras.get(key));
+                            extras.get("wifiInfo"));
                     sb.append(key + ": " +
-                            extras.get(key)).append(System.getProperty("line.separator"));
+                            extras.get("wifiInfo")).append(System.getProperty("line.separator"));
+
                 }
+                mainActivity.addOutput(sb.toString(), getTime());
             }
-            mainActivity.addOutput(sb.toString(), getTime());
             return;
         }
 
@@ -59,10 +63,10 @@ public class ConnectivityReceiver
 
         NetworkInfo ni = debugIntent(intent);
 
-        if (ni.getState().toString().equals("CONNECTED")) {
+        if (ni.getState().toString().equals("CONNECTED") && intent.getAction().equals("android.net.conn.CONNECTIVITY_CHANGE")) {
             getAllNetworks(context);
         }
-        else{
+        else if (ni.getState().toString().equals("DISCONNECTED")) {
             sb.append("Disconnected "+ni.getTypeName()).append(System.getProperty("line.separator"));
         }
 
