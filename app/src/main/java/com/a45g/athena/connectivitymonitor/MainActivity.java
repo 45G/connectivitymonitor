@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
         IntentFilter filter = new IntentFilter();
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        //filter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+        filter.addAction("android.intent.action.ANY_DATA_STATE");
         connReceiver = new ConnectivityReceiver(this);
         registerReceiver(connReceiver, filter);
 

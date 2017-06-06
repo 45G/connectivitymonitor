@@ -40,9 +40,8 @@ public class ConnectivityReceiver
         sb = new StringBuilder();
         sb.append(System.getProperty("line.separator"));
 
-        Bundle extras = intent.getExtras();
-
         if (intent.getAction().equals("android.net.wifi.STATE_CHANGE")) {
+            Bundle extras = intent.getExtras();
             if (((NetworkInfo) extras.get("networkInfo")).getState().toString().equals("CONNECTED")) {
                 Log.v(tag, "Action: " + intent.getAction());
                 sb.append("Action: " + intent.getAction()).append(System.getProperty("line.separator"));
@@ -54,20 +53,20 @@ public class ConnectivityReceiver
                             extras.get("wifiInfo")).append(System.getProperty("line.separator"));
 
                 }
-                mainActivity.addOutput(sb.toString(), getTime());
             }
-            return;
         }
-
-
-
-        NetworkInfo ni = debugIntent(intent);
-
-        if (ni.getState().toString().equals("CONNECTED") && intent.getAction().equals("android.net.conn.CONNECTIVITY_CHANGE")) {
-            getAllNetworks(context);
+        else
+        if (intent.getAction().equals("android.net.conn.CONNECTIVITY_CHANGE")){
+            NetworkInfo ni = debugIntent(intent);
+            if (ni.getState().toString().equals("CONNECTED")) {
+                getAllNetworks(context);
+            }
+            else if (ni.getState().toString().equals("DISCONNECTED")) {
+                sb.append("Disconnected "+ni.getTypeName()).append(System.getProperty("line.separator"));
+            }
         }
-        else if (ni.getState().toString().equals("DISCONNECTED")) {
-            sb.append("Disconnected "+ni.getTypeName()).append(System.getProperty("line.separator"));
+        else{
+            displayIntent(intent);
         }
 
         mainActivity.addOutput(sb.toString(), getTime());
@@ -107,6 +106,24 @@ public class ConnectivityReceiver
                     sb.append("Disconnected "+nets[i].getTypeName()).append(System.getProperty("line.separator"));
                 }
             }
+        }
+    }
+
+    private void displayIntent(Intent intent) {
+        Log.v(tag, "Action: " + intent.getAction());
+        sb.append("Action: " + intent.getAction()).append(System.getProperty("line.separator"));
+        Log.v(tag, "component: " + intent.getComponent());
+        Bundle extras = intent.getExtras();
+        if (extras != null) {
+            for (String key: extras.keySet()) {
+                Log.v(tag, key + ": " +
+                        extras.get(key));
+                sb.append(key + ": " +
+                        extras.get(key)).append(System.getProperty("line.separator"));
+            }
+        }
+        else {
+            Log.v(tag, "no extras");
         }
     }
 
