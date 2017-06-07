@@ -19,8 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
 
-import static android.R.attr.key;
-
 public class ConnectivityReceiver
         extends BroadcastReceiver {
 
@@ -41,32 +39,63 @@ public class ConnectivityReceiver
         sb.append(System.getProperty("line.separator"));
 
         if (intent.getAction().equals("android.net.wifi.STATE_CHANGE")) {
-            Bundle extras = intent.getExtras();
-            if (((NetworkInfo) extras.get("networkInfo")).getState().toString().equals("CONNECTED")) {
-                Log.v(tag, "Action: " + intent.getAction());
-                sb.append("Action: " + intent.getAction()).append(System.getProperty("line.separator"));
-                Log.v(tag, "component: " + intent.getComponent());
-                if (extras != null) {
-                    Log.v(tag, key + ": " +
-                            extras.get("wifiInfo"));
-                    sb.append(key + ": " +
-                            extras.get("wifiInfo")).append(System.getProperty("line.separator"));
-
-                }
+            NetworkInfo ni = getNetworkInfo(intent);
+            if (ni.getState().toString().equals("CONNECTED")) {
+                displayAction(intent);
+                displayKey(intent, "wifiInfo");
+            }
+            else{
+                return;
             }
         }
         else
         if (intent.getAction().equals("android.net.conn.CONNECTIVITY_CHANGE")){
-            NetworkInfo ni = debugIntent(intent);
+            NetworkInfo ni = getNetworkInfo(intent);
             if (ni.getState().toString().equals("CONNECTED")) {
-                getAllNetworks(context);
+                if (ni.getTypeName().equals("WIFI")){
+                    displayAction(intent);
+                    displayAllKeys(intent);
+                    getAllNetworks(context);
+                    ConfigService.startActionWifiEnable(context);
+                }
+                else if (ni.getTypeName().equals("MOBILE")){
+                    return;
+                }
             }
             else if (ni.getState().toString().equals("DISCONNECTED")) {
                 sb.append("Disconnected "+ni.getTypeName()).append(System.getProperty("line.separator"));
+
+                if (ni.getTypeName().equals("WIFI")){
+                    displayAction(intent);
+                    displayAllKeys(intent);
+                    ConfigService.startActionWiFiDisable(context);
+                }
+                else if (ni.getTypeName().equals("MOBILE")){
+                    return;
+                }
             }
         }
         else{
-            displayIntent(intent);
+            if (intent.getAction().equals("android.intent.action.ANY_DATA_STATE")){
+                Bundle extras = intent.getExtras();
+                if (extras.get("reason").equals("connected")
+                        && extras.get("state").equals("CONNECTED")
+                        && extras.get("apn").equals("land")){
+                    displayAction(intent);
+                    displayAllKeys(intent);
+                    ConfigService.startActionLTEEnable(context);
+                }
+                else if (extras.get("reason").equals("specificDisabled")
+                        && extras.get("state").equals("DISCONNECTED")
+                        && (extras.get("apn")!= null && extras.get("apn").equals("land"))){
+                    displayAction(intent);
+                    displayAllKeys(intent);
+                    ConfigService.startActionLTEDisable(context);
+                }
+                else{
+                    return;
+                }
+            }
         }
 
         mainActivity.addOutput(sb.toString(), getTime());
@@ -109,10 +138,12 @@ public class ConnectivityReceiver
         }
     }
 
-    private void displayIntent(Intent intent) {
+    private void displayAction(Intent intent){
         Log.v(tag, "Action: " + intent.getAction());
         sb.append("Action: " + intent.getAction()).append(System.getProperty("line.separator"));
-        Log.v(tag, "component: " + intent.getComponent());
+    }
+
+    private void displayAllKeys(Intent intent){
         Bundle extras = intent.getExtras();
         if (extras != null) {
             for (String key: extras.keySet()) {
@@ -127,23 +158,19 @@ public class ConnectivityReceiver
         }
     }
 
-    private NetworkInfo debugIntent(Intent intent) {
-        Log.v(tag, "Action: " + intent.getAction());
-        sb.append("Action: " + intent.getAction()).append(System.getProperty("line.separator"));
-        Log.v(tag, "component: " + intent.getComponent());
+    private void displayKey(Intent intent, String key){
         Bundle extras = intent.getExtras();
         if (extras != null) {
-            for (String key: extras.keySet()) {
-                Log.v(tag, key + ": " +
-                        extras.get(key));
-                sb.append(key + ": " +
-                        extras.get(key)).append(System.getProperty("line.separator"));
-            }
-        }
-        else {
-            Log.v(tag, "no extras");
-        }
+            Log.v(tag, key + ": " +
+                    extras.get(key));
+            sb.append(key + ": " +
+                    extras.get(key)).append(System.getProperty("line.separator"));
 
+        }
+    }
+
+    private NetworkInfo getNetworkInfo(Intent intent) {
+        Bundle extras = intent.getExtras();
         return (NetworkInfo)(extras.get("networkInfo"));
     }
 

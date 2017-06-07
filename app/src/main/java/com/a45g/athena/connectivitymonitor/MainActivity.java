@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        //mOutputText.setText("Test main");
+        ConfigService.startActionMPTCPEnable(getApplicationContext());
 
         registerReceivers();
     }
