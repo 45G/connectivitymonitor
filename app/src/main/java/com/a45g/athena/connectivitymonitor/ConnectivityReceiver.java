@@ -78,15 +78,15 @@ public class ConnectivityReceiver
         else{
             if (intent.getAction().equals("android.intent.action.ANY_DATA_STATE")){
                 Bundle extras = intent.getExtras();
-                if (extras.get("reason").equals("connected")
-                        && extras.get("state").equals("CONNECTED")
-                        && extras.get("apn").equals("land")){
+                if ((extras.get("reason")!= null && extras.get("reason").equals("connected"))
+                        && (extras.get("state")!= null && extras.get("state").equals("CONNECTED"))
+                        && (extras.get("apn")!= null && extras.get("apn").equals("land"))){
                     displayAction(intent);
                     displayAllKeys(intent);
                     ConfigService.startActionLTEEnable(context);
                 }
-                else if (extras.get("reason").equals("specificDisabled")
-                        && extras.get("state").equals("DISCONNECTED")
+                else if ((extras.get("reason")!= null && extras.get("reason").equals("specificDisabled"))
+                        && (extras.get("state")!= null && extras.get("state").equals("DISCONNECTED"))
                         && (extras.get("apn")!= null && extras.get("apn").equals("land"))){
                     displayAction(intent);
                     displayAllKeys(intent);
