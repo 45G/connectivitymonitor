@@ -57,6 +57,11 @@ public class ConnectivityReceiver
                     displayAllKeys(intent);
                     getAllNetworks(context);
                     ConfigService.startActionWifiEnable(context);
+
+                    DatabaseOperations databaseOperations = new DatabaseOperations(context);
+                    databaseOperations.openWrite();
+                    databaseOperations.insertConnectivityEvent(getTime(), "WIFI", "CONNECTED",sb.toString());
+                    databaseOperations.close();
                 }
                 else if (ni.getTypeName().equals("MOBILE")){
                     return;
@@ -69,6 +74,11 @@ public class ConnectivityReceiver
                     displayAction(intent);
                     displayAllKeys(intent);
                     ConfigService.startActionWiFiDisable(context);
+
+                    DatabaseOperations databaseOperations = new DatabaseOperations(context);
+                    databaseOperations.openWrite();
+                    databaseOperations.insertConnectivityEvent(getTime(), "WIFI", "DISCONNECTED",sb.toString());
+                    databaseOperations.close();
                 }
                 else if (ni.getTypeName().equals("MOBILE")){
                     return;
@@ -80,10 +90,16 @@ public class ConnectivityReceiver
                 Bundle extras = intent.getExtras();
                 if ((extras.get("reason")!= null && extras.get("reason").equals("connected"))
                         && (extras.get("state")!= null && extras.get("state").equals("CONNECTED"))
-                        && (extras.get("apn")!= null && extras.get("apn").equals("land"))){
+                        //&& (extras.get("apn")!= null && extras.get("apn").equals("land"))
+                        ){
                     displayAction(intent);
                     displayAllKeys(intent);
                     ConfigService.startActionLTEEnable(context);
+
+                    DatabaseOperations databaseOperations = new DatabaseOperations(context);
+                    databaseOperations.openWrite();
+                    databaseOperations.insertConnectivityEvent(getTime(), "LTE", "CONNECTED",sb.toString());
+                    databaseOperations.close();
                 }
                 else if ((extras.get("reason")!= null && extras.get("reason").equals("specificDisabled"))
                         && (extras.get("state")!= null && extras.get("state").equals("DISCONNECTED"))
@@ -91,6 +107,11 @@ public class ConnectivityReceiver
                     displayAction(intent);
                     displayAllKeys(intent);
                     ConfigService.startActionLTEDisable(context);
+
+                    DatabaseOperations databaseOperations = new DatabaseOperations(context);
+                    databaseOperations.openWrite();
+                    databaseOperations.insertConnectivityEvent(getTime(), "LTE", "DISCONNECTED",sb.toString());
+                    databaseOperations.close();
                 }
                 else{
                     return;
@@ -98,7 +119,7 @@ public class ConnectivityReceiver
             }
         }
 
-        mainActivity.addOutput(sb.toString(), getTime());
+        mainActivity.getOutputFragment().addOutput(sb.toString(), getTime());
     }
 
     private void getAllNetworks(Context context){

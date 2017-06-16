@@ -4,124 +4,107 @@ import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.View;
-import android.widget.RelativeLayout;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
-    private String tag = "Connectivity Info:";
+    private String tag = "MainActivity:";
 
     private ConnectivityReceiver connReceiver;
 
-    private TextView mOutputText = null;
-    private View mScrollView = null;
-    private RelativeLayout mLayout = null;
+    private SectionsPagerAdapter mSectionsPagerAdapter;
+    private ViewPager mViewPager;
 
-    private int mScrollPos;
-    private int mMaxScrollPosition;
-    private List<OutputData> mOutputCache = null;
-    private Runnable mOutputRunnable = null;
-    private Runnable checkScrollRunnable = null;
+    private OutputFragment mOutputFragment = null;
+    private TestFragment mTestFragment = null;
+
+    final static int OUTPUT_FRAGMENT_INDEX = 0;
+    final static int TEST_FRAGMENT_INDEX = 1;
+
+    final static int FRAGMENTS_NUMBER = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mOutputText = (TextView) findViewById(R.id.outputText);
-        mScrollView = (ScrollView) findViewById(R.id.outputScrollView);
-        mLayout = (RelativeLayout) findViewById(R.id.mainRelative);
 
-        mOutputText.addTextChangedListener(new TextWatcher() {
+        // Initializing fragments.
+        // Depending on user / developer mode initialize what it is needed.
+        mOutputFragment = new OutputFragment();
+        mTestFragment = new TestFragment();
 
-            @Override
-            public void onTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-                // This should not happen.
-            }
+        // Create the adapter that will return a fragment for each of the one / three
+        // primary sections of the application.
+        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-            @Override
-            public void beforeTextChanged(CharSequence arg0, int arg1, int arg2, int arg3) {
-                mScrollPos = mScrollView.getScrollY();
-                mMaxScrollPosition = mLayout.getHeight() - mScrollView.getHeight();
-            }
-
-            @Override
-            public void afterTextChanged(Editable arg0) {
-                checkScroll(mLayout.getHeight() - mScrollView.getHeight() - mMaxScrollPosition);
-            }
-
-        });
-
-        mOutputCache = new ArrayList<OutputData>();
-        mOutputRunnable = new Runnable() {
-            @Override
-            public void run() {
-                appendOutput();
-            }
-        };
-        checkScrollRunnable = new Runnable() {
-            @Override
-            public void run() {
-                ((ScrollView) mScrollView).fullScroll(View.FOCUS_UP);
-            }
-        };
+        // Set up the ViewPager with the sections adapter.
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setAdapter(mSectionsPagerAdapter);
 
         ConfigService.startActionMPTCPEnable(getApplicationContext());
+
+        //SQLiteUpdateHelper createDBHelper = new SQLiteUpdateHelper(getApplicationContext());
+        //createDBHelper.getWritableDatabase();
 
         registerReceivers();
     }
 
-    private synchronized void appendOutput() {
-        if (mOutputCache.size() == 0) {
-            return;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for(OutputData output : mOutputCache) {
-            sb.append(output.getTime()).append(" ")
-                    .append(output.getValue())
-                    .append(System.getProperty("line.separator"))
-                    .append(System.getProperty("line.separator"));
-        }
-
-        mOutputText.setText(sb.toString() + mOutputText.getText());
-        mOutputCache.clear();
+    public OutputFragment getOutputFragment() {
+        return mOutputFragment;
     }
 
-    private void checkScroll(int added) {
-        if (mScrollPos == 0) {
-            mScrollView.post(checkScrollRunnable);
-        } else {
-            Log.d(tag, "Scrolling with addition: " + (-added));
-            mScrollView.scrollBy(0, -added);
+    public TestFragment getTestFragment() {
+        return mTestFragment;
+    }
+
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            Fragment fragment = mOutputFragment;
+
+            switch (position) {
+                case TEST_FRAGMENT_INDEX:
+                    fragment = mTestFragment;
+                    break;
+            }
+
+            return fragment;
+        }
+
+        @Override
+        public int getCount() {
+            return FRAGMENTS_NUMBER;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            Locale l = Locale.getDefault();
+
+            switch (position) {
+                case TEST_FRAGMENT_INDEX:
+                    return getString(R.string.test_fragment_title).toUpperCase(l);
+                case OUTPUT_FRAGMENT_INDEX:
+                    return getString(R.string.output_fragment_title).toUpperCase(l);
+            }
+
+            return null;
         }
     }
 
-    public void addOutput(String value, String time){
 
-        //Log.d(tag, "Test fragment");
-        //mOutputText.setText("Test fragment");
 
-        OutputData output = new OutputData(value, time);
-        if (mOutputCache != null) {
-            mOutputCache.add(output);
-            // if (mOutputCache.size() > MIN_DISPLAY_SIZE) {
-            appendOutput();
-            //} else {
-            //this.postDelayed(mOutputRunnable, 500);
-            //}
-
-        }
-    }
 
     public void registerReceivers(){
         IntentFilter filter = new IntentFilter();
