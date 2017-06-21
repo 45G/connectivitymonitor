@@ -24,7 +24,7 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
     public static final String COLUMN_VALUE = "value";
 
 
-    private static final String CONNECTIVITY_CREATE = "create table "
+    private static final String CONNECTIVITY_CREATE = "CREATE TABLE IF NOT EXISTS "
             + TABLE_CONNECTIVITY + "("
             + COLUMN_ID + " integer primary key autoincrement, "
             + COLUMN_TIMESTAMP + " string not null, "
@@ -32,7 +32,7 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
             + COLUMN_EVENT + " string not null, "
             + COLUMN_DETAILS + " string not null);";
 
-    private static final String TESTS_CREATE = "create table "
+    private static final String TESTS_CREATE = "CREATE TABLE IF NOT EXISTS "
             + TABLE_TESTS + "("
             + COLUMN_ID + " integer primary key autoincrement, "
             + COLUMN_TIMESTAMP + " string not null, "

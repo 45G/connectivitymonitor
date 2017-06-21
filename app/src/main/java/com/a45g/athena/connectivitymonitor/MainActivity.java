@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -65,9 +66,10 @@ public class MainActivity extends AppCompatActivity {
 
         ConfigService.startActionMPTCPEnable(getApplicationContext());
 
-        /*SQLiteUpdateHelper createDBHelper = new SQLiteUpdateHelper(getApplicationContext());
+        SQLiteUpdateHelper createDBHelper = new SQLiteUpdateHelper(getApplicationContext());
         SQLiteDatabase database = createDBHelper.getWritableDatabase();
-        createDBHelper.onUpgrade(database, 1, 2);*/
+        createDBHelper.onCreate(database);
+        //createDBHelper.onUpgrade(database, 1, 2);
 
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction("com.a45g.athena.connectivitymonitor.ACTION_DISPLAY");
