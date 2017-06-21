@@ -1,8 +1,8 @@
 package com.a45g.athena.connectivitymonitor;
 
 import android.annotation.SuppressLint;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -18,7 +18,7 @@ import java.util.List;
 
 public class OutputFragment extends Fragment {
 
-    private String tag = "Connectivity Info:";
+    private String tag = "Output Fragment";
 
     private TextView mOutputText = null;
     private View mScrollView = null;
@@ -29,6 +29,8 @@ public class OutputFragment extends Fragment {
     private List<OutputData> mOutputCache = null;
     private Runnable mOutputRunnable = null;
     private Runnable checkScrollRunnable = null;
+
+    private boolean ready = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -77,10 +79,17 @@ public class OutputFragment extends Fragment {
         return rootView;
     }
 
+    @Override
+    public void onResume (){
+        super.onResume();
+
+        ready = true;
+        Log.d(tag, "Output fragment is ready");
+    }
 
     @SuppressLint("SetTextI18n")
     private synchronized void appendOutput() {
-        if (mOutputCache.size() == 0) {
+        if ((mOutputCache.size() == 0) || (ready == false)) {
             return;
         }
 
@@ -106,9 +115,6 @@ public class OutputFragment extends Fragment {
     }
 
     public void addOutput(String value, String time){
-
-        //Log.d(tag, "Test fragment");
-        //mOutputText.setText("Test fragment");
 
         OutputData output = new OutputData(value, time);
         if (mOutputCache != null) {

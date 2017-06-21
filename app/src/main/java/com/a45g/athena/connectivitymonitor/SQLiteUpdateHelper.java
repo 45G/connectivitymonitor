@@ -20,10 +20,10 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
     public static final String COLUMN_DETAILS = "details";
 
     public static final String TABLE_TESTS = "test_results";
+    public static final String COLUMN_TYPE = "type";
+    public static final String COLUMN_VALUE = "value";
 
 
-
-    // Create ads table
     private static final String CONNECTIVITY_CREATE = "create table "
             + TABLE_CONNECTIVITY + "("
             + COLUMN_ID + " integer primary key autoincrement, "
@@ -32,6 +32,12 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
             + COLUMN_EVENT + " string not null, "
             + COLUMN_DETAILS + " string not null);";
 
+    private static final String TESTS_CREATE = "create table "
+            + TABLE_TESTS + "("
+            + COLUMN_ID + " integer primary key autoincrement, "
+            + COLUMN_TIMESTAMP + " string not null, "
+            + COLUMN_TYPE + " string not null, "
+            + COLUMN_VALUE + " string not null);";
 
 
     public SQLiteUpdateHelper(Context context) {
@@ -42,24 +48,31 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
         database.execSQL(CONNECTIVITY_CREATE);
     }
 
-
-
     public void deleteConnectivity(SQLiteDatabase database) {
         database.execSQL("DROP TABLE IF EXISTS " + TABLE_CONNECTIVITY);
     }
 
+    public void createTests(SQLiteDatabase database) {
+        database.execSQL(TESTS_CREATE);
+    }
+
+    public void deleteTests(SQLiteDatabase database) {
+        database.execSQL("DROP TABLE IF EXISTS " + TABLE_TESTS);
+    }
 
     @Override
     public void onCreate(SQLiteDatabase database) {
         Log.d(LOG_TAG, "Creating tables in " + DATABASE_NAME);
 
         createConnectivity(database);
+        createTests(database);
     }
 
     public void onDelete(SQLiteDatabase database) {
         Log.d(LOG_TAG, "Deleting tables from " + DATABASE_NAME);
 
         deleteConnectivity(database);
+        deleteTests(database);
     }
 
     @Override

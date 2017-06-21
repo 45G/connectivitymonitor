@@ -1,12 +1,13 @@
 package com.a45g.athena.connectivitymonitor;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.ConnectivityManager;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 
@@ -29,6 +30,20 @@ public class MainActivity extends AppCompatActivity {
 
     final static int FRAGMENTS_NUMBER = 2;
 
+    private IntentFilter mIntentFilter = null;
+
+    private BroadcastReceiver mIntentReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals("com.a45g.athena.connectivitymonitor.ACTION_DISPLAY")){
+                Bundle extras = intent.getExtras();
+                String time = extras.get("timestamp").toString();
+                String value = extras.get("value").toString();
+                mOutputFragment.addOutput(value, time);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,10 +65,30 @@ public class MainActivity extends AppCompatActivity {
 
         ConfigService.startActionMPTCPEnable(getApplicationContext());
 
-        //SQLiteUpdateHelper createDBHelper = new SQLiteUpdateHelper(getApplicationContext());
-        //createDBHelper.getWritableDatabase();
+        /*SQLiteUpdateHelper createDBHelper = new SQLiteUpdateHelper(getApplicationContext());
+        SQLiteDatabase database = createDBHelper.getWritableDatabase();
+        createDBHelper.onUpgrade(database, 1, 2);*/
 
-        registerReceivers();
+        mIntentFilter = new IntentFilter();
+        mIntentFilter.addAction("com.a45g.athena.connectivitymonitor.ACTION_DISPLAY");
+
+    }
+
+    @Override
+    protected void onResume() {
+        registerReceiver(mIntentReceiver, mIntentFilter);
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        unregisterReceiver(mIntentReceiver);
+        super.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
     }
 
     public OutputFragment getOutputFragment() {
@@ -72,9 +107,12 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public Fragment getItem(int position) {
-            Fragment fragment = mOutputFragment;
+            Fragment fragment = null;
 
             switch (position) {
+                case OUTPUT_FRAGMENT_INDEX:
+                    fragment = mOutputFragment;
+                    break;
                 case TEST_FRAGMENT_INDEX:
                     fragment = mTestFragment;
                     break;
@@ -104,38 +142,4 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-    public void registerReceivers(){
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
-        filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-        filter.addAction("android.intent.action.ANY_DATA_STATE");
-        connReceiver = new ConnectivityReceiver(this);
-        registerReceiver(connReceiver, filter);
-
-        /*TelephonyManager tm = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-
-        PhoneStateListener myCustomPhoneStateListener = new PhoneStateListener(){
-            public void onDataConnectionStateChanged(int state){
-                switch(state){
-                    case TelephonyManager.DATA_DISCONNECTED:
-                        Log.v(tag, "Mobile data disconnected");
-                        break;
-                    case TelephonyManager.DATA_CONNECTED:
-                        Log.v(tag, "Mobile data connected");
-                        break;
-                }
-            }
-        };
-
-        tm.listen(myCustomPhoneStateListener, PhoneStateListener.LISTEN_DATA_CONNECTION_STATE);*/
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        unregisterReceiver(connReceiver);
-    }
 }

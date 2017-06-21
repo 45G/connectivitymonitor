@@ -20,6 +20,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class TestFragment extends Fragment {
 
@@ -141,10 +143,21 @@ public class TestFragment extends Fragment {
             String[] lineTokens = output.split("\n");
             String[] tokens = lineTokens[0].split(" ");
 
-            return tokens[4];
+            if (tokens.length >= 5)
+                return tokens[4];
+            else
+                return null;
         }
 
         protected void onPostExecute(String result) {
+
+            if (result == null) return;
+
+            DatabaseOperations databaseOperations = new DatabaseOperations(getContext());
+            databaseOperations.openWrite();
+            databaseOperations.insertTestResult(getTime(), "RTT", result);
+            databaseOperations.close();
+
             CharSequence previousResults = mResult.getText();
             mResult.setText(previousResults + "\n" + result + " ms");
             Log.d(tag, result);
@@ -188,5 +201,9 @@ public class TestFragment extends Fragment {
             baos.write(buffer, 0, length);
         }
         return baos.toString("UTF-8");
+    }
+
+    private String getTime(){
+        return new SimpleDateFormat("HH:mm:ss").format(new Date());
     }
 }

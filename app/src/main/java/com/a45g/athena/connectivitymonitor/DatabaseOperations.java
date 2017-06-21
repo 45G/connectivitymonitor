@@ -24,6 +24,11 @@ public class DatabaseOperations {
             SQLiteUpdateHelper.COLUMN_DETAILS
     };
 
+    private String[] allTestsColumns = {
+            SQLiteUpdateHelper.COLUMN_ID, SQLiteUpdateHelper.COLUMN_TIMESTAMP,
+            SQLiteUpdateHelper.COLUMN_TYPE, SQLiteUpdateHelper.COLUMN_VALUE
+    };
+
     public DatabaseOperations(Context context) {
         mDatabaseUpdateHelper = new SQLiteUpdateHelper(context);
         mNumUpdateOpened = 0;
@@ -72,7 +77,21 @@ public class DatabaseOperations {
         return mDatabaseUpdate.insert(SQLiteUpdateHelper.TABLE_CONNECTIVITY, null, values);
     }
 
-    public List<ConnectivityOutput> getAllResults() {
+    public long insertTestResult(String timestamp, String type, String value) {
+        if (mDatabaseUpdate == null) {
+            Log.e(tag, "Insert with database closed.");
+            return -1;
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(SQLiteUpdateHelper.COLUMN_TIMESTAMP, timestamp);
+        values.put(SQLiteUpdateHelper.COLUMN_TYPE, type);
+        values.put(SQLiteUpdateHelper.COLUMN_VALUE, value);
+
+        return mDatabaseUpdate.insert(SQLiteUpdateHelper.TABLE_TESTS, null, values);
+    }
+
+    public List<ConnectivityOutput> getAllConnectivityOutputs() {
         if (mDatabaseUpdate == null) {
             Log.e(tag, "getAllResults: Query with database closed.");
             return null;
@@ -105,6 +124,39 @@ public class DatabaseOperations {
                 cursor.getString(3), cursor.getString(4));
     }
 
+
+    public List<TestOutput> getAllTestOutputs() {
+        if (mDatabaseUpdate == null) {
+            Log.e(tag, "getAllResults: Query with database closed.");
+            return null;
+        }
+
+        List<TestOutput> outputs = new ArrayList<TestOutput>();
+        Cursor cursor = mDatabaseUpdate.query(SQLiteUpdateHelper.TABLE_TESTS, allTestsColumns,
+                null, null, null, null, null);
+
+        try {
+            if (cursor != null) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    TestOutput output = cursorToTestOutput(cursor);
+                    outputs.add(output);
+                    cursor.moveToNext();
+                }
+            }
+        } finally {
+            if (cursor != null){
+                cursor.close();
+            }
+        }
+
+        return outputs;
+    }
+
+    private TestOutput cursorToTestOutput(Cursor cursor) {
+        return new TestOutput(cursor.getLong(0), cursor.getString(1), cursor.getString(2),
+                cursor.getString(3));
+    }
 
 
 

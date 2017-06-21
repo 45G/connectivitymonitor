@@ -23,7 +23,9 @@
 
         <service
             android:name=".ConfigService"
-            android:exported="false"></service>
+            android:exported="false"
+            android:process=":configservice"></service>
+
     </application>
 
 </manifest>

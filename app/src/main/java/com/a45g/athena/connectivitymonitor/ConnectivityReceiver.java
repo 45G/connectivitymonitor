@@ -32,6 +32,8 @@ public class ConnectivityReceiver
         mainActivity = ma;
     }
 
+    public ConnectivityReceiver() {;}
+
     @Override
     public void onReceive(Context context, Intent intent) {
 
@@ -90,7 +92,7 @@ public class ConnectivityReceiver
                 Bundle extras = intent.getExtras();
                 if ((extras.get("reason")!= null && extras.get("reason").equals("connected"))
                         && (extras.get("state")!= null && extras.get("state").equals("CONNECTED"))
-                        //&& (extras.get("apn")!= null && extras.get("apn").equals("land"))
+                        && (extras.get("apn")!= null && extras.get("apn").equals("land"))
                         ){
                     displayAction(intent);
                     displayAllKeys(intent);
@@ -119,7 +121,13 @@ public class ConnectivityReceiver
             }
         }
 
-        mainActivity.getOutputFragment().addOutput(sb.toString(), getTime());
+        //if (mainActivity != null)
+        //    mainActivity.getOutputFragment().addOutput(sb.toString(), getTime());
+
+        Intent i=new Intent("com.a45g.athena.connectivitymonitor.ACTION_DISPLAY");
+        i.putExtra("timestamp", getTime());
+        i.putExtra("value", sb.toString());
+        context.sendBroadcast(i);
     }
 
     private void getAllNetworks(Context context){
@@ -148,12 +156,6 @@ public class ConnectivityReceiver
                         sb.append("IP info: "+prop.toString()).append(System.getProperty("line.separator"));
 
                     }
-                }
-                else
-                if (nets[i].getState() == NetworkInfo.State.DISCONNECTED
-                        && (nets[i].getTypeName().equals("MOBILE") || nets[i].getTypeName().equals("WIFI"))){
-                    Log.v(tag, "Disconnected "+nets[i].getTypeName());
-                    sb.append("Disconnected "+nets[i].getTypeName()).append(System.getProperty("line.separator"));
                 }
             }
         }
