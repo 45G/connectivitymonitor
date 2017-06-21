@@ -68,6 +68,9 @@ public class ConnectivityReceiver
                 else if (ni.getTypeName().equals("MOBILE")){
                     return;
                 }
+                else{
+                    return;
+                }
             }
             else if (ni.getState().toString().equals("DISCONNECTED")) {
                 sb.append("Disconnected "+ni.getTypeName()).append(System.getProperty("line.separator"));
@@ -85,14 +88,17 @@ public class ConnectivityReceiver
                 else if (ni.getTypeName().equals("MOBILE")){
                     return;
                 }
+                else{
+                    return;
+                }
             }
         }
         else{
             if (intent.getAction().equals("android.intent.action.ANY_DATA_STATE")){
                 Bundle extras = intent.getExtras();
-                if ((extras.get("reason")!= null && extras.get("reason").equals("connected"))
-                        && (extras.get("state")!= null && extras.get("state").equals("CONNECTED"))
-                        && (extras.get("apn")!= null && extras.get("apn").equals("land"))
+                if ((extras.get("reason") != null && extras.get("reason").equals("connected"))
+                        && (extras.get("state") != null && extras.get("state").equals("CONNECTED"))
+                        && (extras.get("apn") != null && extras.get("apn").equals("land"))
                         ){
                     displayAction(intent);
                     displayAllKeys(intent);
@@ -103,9 +109,10 @@ public class ConnectivityReceiver
                     databaseOperations.insertConnectivityEvent(getTime(), "LTE", "CONNECTED",sb.toString());
                     databaseOperations.close();
                 }
-                else if ((extras.get("reason")!= null && extras.get("reason").equals("specificDisabled"))
-                        && (extras.get("state")!= null && extras.get("state").equals("DISCONNECTED"))
-                        && (extras.get("apn")!= null && extras.get("apn").equals("land"))){
+                else if ((extras.get("state") != null && extras.get("state").equals("DISCONNECTED"))
+                        && (extras.get("apn") != null && extras.get("apn").equals("land"))
+                        && (extras.get("reason") != null && extras.get("reason").equals("specificDisabled")
+                                || (extras.get("reason") == null))){
                     displayAction(intent);
                     displayAllKeys(intent);
                     ConfigService.startActionLTEDisable(context);
@@ -115,7 +122,8 @@ public class ConnectivityReceiver
                     databaseOperations.insertConnectivityEvent(getTime(), "LTE", "DISCONNECTED",sb.toString());
                     databaseOperations.close();
                 }
-                else{
+                else
+                {
                     return;
                 }
             }
@@ -123,7 +131,6 @@ public class ConnectivityReceiver
 
         //if (mainActivity != null)
         //    mainActivity.getOutputFragment().addOutput(sb.toString(), getTime());
-
         Intent i=new Intent("com.a45g.athena.connectivitymonitor.ACTION_DISPLAY");
         i.putExtra("timestamp", getTime());
         i.putExtra("value", sb.toString());
