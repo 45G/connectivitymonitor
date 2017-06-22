@@ -69,6 +69,8 @@ public class MainActivity extends AppCompatActivity {
         createDBHelper.onCreate(database);
         //createDBHelper.onUpgrade(database, 1, 2);
 
+        ConfigService.startService(getApplicationContext());
+
         mIntentFilter = new IntentFilter();
         mIntentFilter.addAction("com.a45g.athena.connectivitymonitor.ACTION_DISPLAY");
 

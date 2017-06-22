@@ -26,6 +26,7 @@ public class ConfigService extends Service {
     private static final String ACTION_LTE_ENABLE = "com.a45g.athena.connectivitymonitor.action.LTEENABLE";
     private static final String ACTION_LTE_DISABLE = "com.a45g.athena.connectivitymonitor.action.LTEDISABLE";
     private static final String ACTION_MPTCP_ENABLE = "com.a45g.athena.connectivitymonitor.action.MPTCPENABLE";
+    private static final String ACTION_START_SERVICE = "com.a45g.athena.connectivitymonitor.action.STARTSERVICE";
 
     private ConnectivityReceiver connReceiver;
 
@@ -85,6 +86,12 @@ public class ConfigService extends Service {
         unregisterReceiver(connReceiver);
     }
 
+    public static void startService(Context context){
+        Intent intent = new Intent(context, ConfigService.class);
+        intent.setAction(ACTION_START_SERVICE);
+        context.startService(intent);
+    }
+
 
     public static void startActionWifiEnable(Context context){
         Intent intent = new Intent(context, ConfigService.class);
@@ -121,6 +128,9 @@ public class ConfigService extends Service {
     private void handleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
+            if (ACTION_START_SERVICE.equals(action)){
+                testPWD();
+            }
             if (ACTION_WIFI_ENABLE.equals(action)) {
                 handleActionWifiEnable();
             }
@@ -165,6 +175,11 @@ public class ConfigService extends Service {
         if (output.equals("net.mptcp.mptcp_enabled = 0\n")){
             Log.d(LOG_TAG, sudoForResult("sysctl -w net.mptcp.mptcp_enabled=1"));
         }
+    }
+
+    private void testPWD(){
+        String output = sudoForResult("pwd");
+        Log.d(LOG_TAG, output);
     }
 
     private static String sudoForResult(String...strings) {
