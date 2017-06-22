@@ -64,8 +64,6 @@ public class MainActivity extends AppCompatActivity {
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        ConfigService.startActionMPTCPEnable(getApplicationContext());
-
         SQLiteUpdateHelper createDBHelper = new SQLiteUpdateHelper(getApplicationContext());
         SQLiteDatabase database = createDBHelper.getWritableDatabase();
         createDBHelper.onCreate(database);

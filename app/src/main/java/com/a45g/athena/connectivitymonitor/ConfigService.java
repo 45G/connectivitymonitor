@@ -43,6 +43,10 @@ public class ConfigService extends Service {
 
         mContext = this;
         setForeground();
+
+        handleActionMPTCPEnable();
+        handleActionLTEEnable();
+
         registerReceivers();
     }
 
