@@ -16,14 +16,12 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import static com.a45g.athena.connectivitymonitor.HelperFunctions.getTime;
+import static com.a45g.athena.connectivitymonitor.HelperFunctions.sudoForResult;
 
 public class TestFragment extends Fragment {
+
+    private static final String LOG_TAG = TestFragment.class.getName();
 
     private TextView mScriptText = null;
     private EditText mScriptName = null;
@@ -46,16 +44,10 @@ public class TestFragment extends Fragment {
     private int mMaxScrollPosition;
     private Runnable checkScrollRunnable = null;
 
-    private String tag = "TestFragment";
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.test_fragment, container, false);
-
-        Log.d(tag, "test1");
-
-
 
         mScriptText = (TextView) rootView.findViewById(R.id.scriptText);
         mScriptName = (EditText) rootView.findViewById(R.id.scriptName);
@@ -80,7 +72,7 @@ public class TestFragment extends Fragment {
         mStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(tag, "test2");
+                Log.d(LOG_TAG, "test2");
 
                 String times = mTimesValue.getText().toString();
 
@@ -130,7 +122,7 @@ public class TestFragment extends Fragment {
         if (mScrollPos == 0) {
             mScrollView.post(checkScrollRunnable);
         } else {
-            Log.d(tag, "Scrolling with addition: " + (-added));
+            Log.d(LOG_TAG, "Scrolling with addition: " + (-added));
             mScrollView.scrollBy(0, -added);
         }
     }
@@ -160,50 +152,9 @@ public class TestFragment extends Fragment {
 
             CharSequence previousResults = mResult.getText();
             mResult.setText(previousResults + "\n" + result + " ms");
-            Log.d(tag, result);
+            Log.d(LOG_TAG, result);
         }
     }
 
-    private static String sudoForResult(String...strings) {
-        String res = "";
-        DataOutputStream outputStream = null;
-        InputStream response = null;
-        try{
-            Process su = Runtime.getRuntime().exec("su");
-            outputStream = new DataOutputStream(su.getOutputStream());
-            response = su.getInputStream();
 
-            for (String s : strings) {
-                outputStream.writeBytes(s+"\n");
-                outputStream.flush();
-            }
-
-            outputStream.writeBytes("exit\n");
-            outputStream.flush();
-            try {
-                su.waitFor();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            res = readFully(response);
-        } catch (IOException e){
-            e.printStackTrace();
-        } finally {
-            Closer.closeSilently(outputStream, response);
-        }
-        return res;
-    }
-    private static String readFully(InputStream is) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length = 0;
-        while ((length = is.read(buffer)) != -1) {
-            baos.write(buffer, 0, length);
-        }
-        return baos.toString("UTF-8");
-    }
-
-    private String getTime(){
-        return new SimpleDateFormat("HH:mm:ss").format(new Date());
-    }
 }

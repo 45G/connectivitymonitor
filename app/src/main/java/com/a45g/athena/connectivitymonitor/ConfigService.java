@@ -12,10 +12,7 @@ import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import static com.a45g.athena.connectivitymonitor.HelperFunctions.sudoForResult;
 
 public class ConfigService extends Service {
     private static final String LOG_TAG = ConfigService.class.getName();
@@ -27,10 +24,10 @@ public class ConfigService extends Service {
     private static final String ACTION_LTE_DISABLE = "com.a45g.athena.connectivitymonitor.action.LTEDISABLE";
     private static final String ACTION_MPTCP_ENABLE = "com.a45g.athena.connectivitymonitor.action.MPTCPENABLE";
     private static final String ACTION_START_SERVICE = "com.a45g.athena.connectivitymonitor.action.STARTSERVICE";
+    private static final String LTE_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/set_mptcp_lte.sh";
+    private static final String WIFI_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/set_mptcp_wifi.sh";
 
     private ConnectivityReceiver connReceiver;
-
-    private Context mContext = null;
 
     @Nullable
     @Override
@@ -42,8 +39,9 @@ public class ConfigService extends Service {
     public void onCreate() {
         Log.d(LOG_TAG, "Starting ConfigService.");
 
-        mContext = this;
         setForeground();
+
+        saveScripts();
 
         handleActionMPTCPEnable();
         handleActionLTEEnable();
@@ -129,7 +127,7 @@ public class ConfigService extends Service {
         if (intent != null) {
             final String action = intent.getAction();
             if (ACTION_START_SERVICE.equals(action)){
-                testPWD();
+                //testPWD();
             }
             if (ACTION_WIFI_ENABLE.equals(action)) {
                 handleActionWifiEnable();
@@ -150,7 +148,7 @@ public class ConfigService extends Service {
     }
 
     private void handleActionWifiEnable(){
-        String output = sudoForResult("sh /sdcard/set_mptcp_wifi.sh");
+        String output = sudoForResult("sh "+WIFI_SCRIPT);
         Log.d(LOG_TAG, output);
     }
 
@@ -160,7 +158,7 @@ public class ConfigService extends Service {
     }
 
     private void handleActionLTEEnable(){
-        String output = sudoForResult("sh /sdcard/set_mptcp_lte.sh");
+        String output = sudoForResult("sh "+LTE_SCRIPT);
         Log.d(LOG_TAG, output);
     }
 
@@ -177,48 +175,14 @@ public class ConfigService extends Service {
         }
     }
 
+    private void saveScripts(){
+        HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_lte, LTE_SCRIPT);
+        HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_wifi, WIFI_SCRIPT);
+    }
+
     private void testPWD(){
         String output = sudoForResult("pwd");
         Log.d(LOG_TAG, output);
-    }
-
-    private static String sudoForResult(String...strings) {
-        String res = "";
-        DataOutputStream outputStream = null;
-        InputStream response = null;
-        try{
-            Process su = Runtime.getRuntime().exec("su");
-            outputStream = new DataOutputStream(su.getOutputStream());
-            response = su.getInputStream();
-
-            for (String s : strings) {
-                outputStream.writeBytes(s+"\n");
-                outputStream.flush();
-            }
-
-            outputStream.writeBytes("exit\n");
-            outputStream.flush();
-            try {
-                su.waitFor();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            res = readFully(response);
-        } catch (IOException e){
-            e.printStackTrace();
-        } finally {
-            Closer.closeSilently(outputStream, response);
-        }
-        return res;
-    }
-    private static String readFully(InputStream is) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int length = 0;
-        while ((length = is.read(buffer)) != -1) {
-            baos.write(buffer, 0, length);
-        }
-        return baos.toString("UTF-8");
     }
 
     private void registerReceivers(){

@@ -12,11 +12,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseOperations {
+    private static final String LOG_TAG = DatabaseOperations.class.getName();
     private SQLiteDatabase mDatabaseUpdate = null;
     private SQLiteUpdateHelper mDatabaseUpdateHelper = null;
     private int mNumUpdateOpened;
-
-    private String tag = "DatabaseOperations";
 
     private String[] allConnectivityColumns = {
             SQLiteUpdateHelper.COLUMN_ID, SQLiteUpdateHelper.COLUMN_TIMESTAMP,
@@ -40,7 +39,7 @@ public class DatabaseOperations {
                 try {
                     mDatabaseUpdate = mDatabaseUpdateHelper.getWritableDatabase();
                 } catch (SQLException sqlException) {
-                    Log.e(tag, "SQL exception thrown while trying to get writable database",
+                    Log.e(LOG_TAG, "SQL exception thrown while trying to get writable database",
                             sqlException);
                     // TODO: Do something in this case.
                 }
@@ -64,7 +63,7 @@ public class DatabaseOperations {
 
     public long insertConnectivityEvent(String timestamp, String iface, String event, String details) {
         if (mDatabaseUpdate == null) {
-            Log.e(tag, "Insert with database closed.");
+            Log.e(LOG_TAG, "Insert with database closed.");
             return -1;
         }
 
@@ -79,7 +78,7 @@ public class DatabaseOperations {
 
     public long insertTestResult(String timestamp, String type, String value) {
         if (mDatabaseUpdate == null) {
-            Log.e(tag, "Insert with database closed.");
+            Log.e(LOG_TAG, "Insert with database closed.");
             return -1;
         }
 
@@ -93,7 +92,7 @@ public class DatabaseOperations {
 
     public List<ConnectivityOutput> getAllConnectivityOutputs() {
         if (mDatabaseUpdate == null) {
-            Log.e(tag, "getAllResults: Query with database closed.");
+            Log.e(LOG_TAG, "getAllResults: Query with database closed.");
             return null;
         }
 
@@ -127,7 +126,7 @@ public class DatabaseOperations {
 
     public List<TestOutput> getAllTestOutputs() {
         if (mDatabaseUpdate == null) {
-            Log.e(tag, "getAllResults: Query with database closed.");
+            Log.e(LOG_TAG, "getAllResults: Query with database closed.");
             return null;
         }
 

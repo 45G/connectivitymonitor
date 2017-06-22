@@ -17,8 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OutputFragment extends Fragment {
-
-    private String tag = "Output Fragment";
+    private static final String LOG_TAG = OutputFragment.class.getName();
 
     private TextView mOutputText = null;
     private View mScrollView = null;
@@ -84,7 +83,7 @@ public class OutputFragment extends Fragment {
         super.onResume();
 
         ready = true;
-        Log.d(tag, "Output fragment is ready");
+        Log.d(LOG_TAG, "OutputFragment is ready");
     }
 
     @SuppressLint("SetTextI18n")
@@ -109,7 +108,7 @@ public class OutputFragment extends Fragment {
         if (mScrollPos == 0) {
             mScrollView.post(checkScrollRunnable);
         } else {
-            Log.d(tag, "Scrolling with addition: " + (-added));
+            Log.d(LOG_TAG, "Scrolling with addition: " + (-added));
             mScrollView.scrollBy(0, -added);
         }
     }

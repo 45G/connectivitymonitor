@@ -15,22 +15,16 @@ import android.util.Log;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Enumeration;
+
+import static com.a45g.athena.connectivitymonitor.HelperFunctions.getTime;
 
 public class ConnectivityReceiver
         extends BroadcastReceiver {
-
-    private String tag = "Connectivity Info:";
-
-    private MainActivity mainActivity = null;
+    
+    private static final String LOG_TAG = ConnectivityReceiver.class.getName();
 
     private StringBuilder sb = null;
-
-    public ConnectivityReceiver(MainActivity ma){
-        mainActivity = ma;
-    }
 
     public ConnectivityReceiver() {;}
 
@@ -146,7 +140,7 @@ public class ConnectivityReceiver
                 if (nets[i].getState() == NetworkInfo.State.CONNECTED
                     && (nets[i].getTypeName().equals("MOBILE") || nets[i].getTypeName().equals("WIFI")))
                 {
-                    Log.v(tag, "Connected "+nets[i].getTypeName());
+                    Log.v(LOG_TAG, "Connected "+nets[i].getTypeName());
                     sb.append("Connected "+nets[i].getTypeName()).append(System.getProperty("line.separator"));
 
 
@@ -169,7 +163,7 @@ public class ConnectivityReceiver
     }
 
     private void displayAction(Intent intent){
-        Log.v(tag, "Action: " + intent.getAction());
+        Log.v(LOG_TAG, "Action: " + intent.getAction());
         sb.append("Action: " + intent.getAction()).append(System.getProperty("line.separator"));
     }
 
@@ -177,21 +171,21 @@ public class ConnectivityReceiver
         Bundle extras = intent.getExtras();
         if (extras != null) {
             for (String key: extras.keySet()) {
-                Log.v(tag, key + ": " +
+                Log.v(LOG_TAG, key + ": " +
                         extras.get(key));
                 sb.append(key + ": " +
                         extras.get(key)).append(System.getProperty("line.separator"));
             }
         }
         else {
-            Log.v(tag, "no extras");
+            Log.v(LOG_TAG, "no extras");
         }
     }
 
     private void displayKey(Intent intent, String key){
         Bundle extras = intent.getExtras();
         if (extras != null) {
-            Log.v(tag, key + ": " +
+            Log.v(LOG_TAG, key + ": " +
                     extras.get(key));
             sb.append(key + ": " +
                     extras.get(key)).append(System.getProperty("line.separator"));
@@ -212,7 +206,7 @@ public class ConnectivityReceiver
             if (info != null)
                     if (info.getState() == NetworkInfo.State.CONNECTED)
                     {
-                        Log.v(tag, "Connected "+info.getTypeName());
+                        Log.v(LOG_TAG, "Connected "+info.getTypeName());
 
 
                         if (info.getType() == ConnectivityManager.TYPE_WIFI) {
@@ -230,12 +224,12 @@ public class ConnectivityReceiver
         WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
         String wifiName = wifiManager.getConnectionInfo().getSSID();
         if (wifiName != null) {
-            Log.v(tag, "WiFi SSID: " + wifiName);
+            Log.v(LOG_TAG, "WiFi SSID: " + wifiName);
             sb.append("WiFi SSID: " + wifiName).append(System.getProperty("line.separator"));
 
         }
         DhcpInfo dhcpInfo = wifiManager.getDhcpInfo();
-        Log.v(tag, "DHCP Info: "+dhcpInfo.toString());
+        Log.v(LOG_TAG, "DHCP Info: "+dhcpInfo.toString());
         sb.append("DHCP Info: "+dhcpInfo.toString()).append(System.getProperty("line.separator"));
     }
 
@@ -243,11 +237,11 @@ public class ConnectivityReceiver
         TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
         String networkName = tm.getNetworkOperatorName();
         if (networkName != null){
-            Log.v(tag, "Mobile network name: "+networkName+"\n IP: "+getMobileIP());
+            Log.v(LOG_TAG, "Mobile network name: "+networkName+"\n IP: "+getMobileIP());
             sb.append("Mobile network name: "+networkName).append(System.getProperty("line.separator"));
             //sb.append("IP: "+getMobileIP()).append(System.getProperty("line.separator"));
         }
-       // Log.v(tag, tm.getCarrierConfig());
+       // Log.v(LOG_TAG, tm.getCarrierConfig());
 
     }
 
@@ -273,15 +267,8 @@ public class ConnectivityReceiver
                 }
             }
         } catch (SocketException ex) {
-            Log.e(tag, "Exception in Get IP Address: " + ex.toString());
+            Log.e(LOG_TAG, "Exception in Get IP Address: " + ex.toString());
         }
         return null;
     }
-
-    private String getTime(){
-        return new SimpleDateFormat("HH:mm:ss").format(new Date());
-    }
-
-
-
 }

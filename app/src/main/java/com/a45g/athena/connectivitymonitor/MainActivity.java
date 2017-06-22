@@ -15,10 +15,7 @@ import android.support.v7.app.AppCompatActivity;
 import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
-
-    private String tag = "MainActivity:";
-
-    private ConnectivityReceiver connReceiver;
+    private static final String LOG_TAG = MainActivity.class.getName();
 
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
@@ -50,17 +47,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        // Initializing fragments.
-        // Depending on user / developer mode initialize what it is needed.
         mOutputFragment = new OutputFragment();
         mTestFragment = new TestFragment();
-
-        // Create the adapter that will return a fragment for each of the one / three
-        // primary sections of the application.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
-        // Set up the ViewPager with the sections adapter.
         mViewPager = (ViewPager) findViewById(R.id.pager);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
