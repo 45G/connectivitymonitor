@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="execute_array">
+        <item>Native executable</item>
+        <item>Python script</item>
+        <item>Shell script</item>
+    </string-array>
+</resources>

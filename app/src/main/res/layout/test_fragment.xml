@@ -20,9 +20,16 @@
         tools:context="com.a45g.athena.connectivitymonitor.TestFragment"
         android:weightSum="1">
 
+        <Button
+            android:text="Choose executable/script type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/chooseType"
+            android:layout_weight="0.40"
+            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
         <TextView
-            android:text="Script:"
+            android:text="Executable/Script:"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/scriptText" />
@@ -77,15 +84,31 @@
             android:ems="10"
             android:id="@+id/timesValue" />
 
-        <Button
-            android:text="Start Test"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:id="@+id/start"
-            android:layout_weight="0.02" />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <Button
+                android:text="Start Test"
+                android:layout_width="119dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/start" />
+
+            <Button
+                android:text="Stop Test"
+                android:layout_width="119dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/stop" />
+
+            <Button
+                android:text="Clear"
+                android:layout_width="119dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/clear" />
+        </LinearLayout>
 
         <TextView
-            android:text="Result:"
+            android:text="Output:"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/resultText" />

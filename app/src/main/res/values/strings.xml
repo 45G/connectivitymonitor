@@ -2,4 +2,5 @@
     <string name="app_name">ConnectivityMonitor</string>
     <string name="test_fragment_title">Testing Configuration</string>
     <string name="output_fragment_title">Connectivity Information</string>
+    <string name="execute">Choose executable/script type:</string>
 </resources>
