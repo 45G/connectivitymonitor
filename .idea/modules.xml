@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/ConnectivityMonitor.iml" filepath="$PROJECT_DIR$/ConnectivityMonitor.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/connectivitymonitor.iml" filepath="$PROJECT_DIR$/connectivitymonitor.iml" />
     </modules>
   </component>
 </project>

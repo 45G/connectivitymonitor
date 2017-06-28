@@ -13,7 +13,9 @@ import java.io.InputStream;
 import java.net.DatagramSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 public class HelperFunctions {
     private static final String LOG_TAG = HelperFunctions.class.getName();
@@ -72,9 +74,9 @@ public class HelperFunctions {
         }
     }
 
-    public static String getTime(){
-        return new SimpleDateFormat("HH:mm:ss").format(new Date());
-    }
+    //public static String getTime(){ return new SimpleDateFormat("HH:mm:ss").format(new Date()); }
+    public static String getTime(){return "" + System.currentTimeMillis() / 1000l;   }
+
 
     private static void closeSilently(Object... xs) {
         for (Object x : xs) {

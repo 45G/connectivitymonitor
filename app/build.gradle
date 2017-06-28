@@ -5,8 +5,8 @@ android {
     buildToolsVersion "25.0.1"
     defaultConfig {
         applicationId "com.a45g.athena.connectivitymonitor"
-        minSdkVersion 23
-        targetSdkVersion 25
+        minSdkVersion 24
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
