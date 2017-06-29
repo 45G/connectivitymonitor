@@ -177,6 +177,18 @@ public class TestFragment extends Fragment {
         return rootView;
     }
 
+    private void disableEditText(EditText editText) {
+        editText.setFocusable(false);
+        editText.setEnabled(false);
+        editText.setCursorVisible(false);
+    }
+
+    private void enableEditText(EditText editText) {
+        editText.setFocusable(true);
+        editText.setEnabled(true);
+        editText.setCursorVisible(true);
+    }
+
     private void checkScroll(int added) {
         if (mScrollPos == 0) {
             mScrollView.post(checkScrollRunnable);
@@ -194,9 +206,6 @@ public class TestFragment extends Fragment {
 
             String result = sudoForResult(params[0]);
             String[] lineTokens = result.split("\n");
-            //String[] tokens = lineTokens[0].split(" ");
-            //if (tokens.length >= 5)
-            //    Log.d(LOG_TAG, tokens[4]+" ms");
 
             if (methodIndex == 1){
                 output = lineTokens[0];
@@ -241,11 +250,37 @@ public class TestFragment extends Fragment {
         builder.setTitle(R.string.execute)
                 .setItems(R.array.execute_array, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        // The 'which' argument contains the index position
-                        // of the selected item
+
                         Log.d(LOG_TAG, "Selected option "+which);
+
                         methodIndex = which;
                         mScriptText.setText(methodName[methodIndex]+":");
+
+                        switch (methodIndex){
+                            case 0:
+                                disableEditText(mDomainName);
+                                disableEditText(mPortValue);
+                                mScriptName.setText("ping -c 3 jepi.cs.pub.ro");
+                                mTimesValue.setText("1");
+                                break;
+                            case 1:
+                                enableEditText(mDomainName);
+                                enableEditText(mPortValue);
+                                mScriptName.setText("/sdcard/tcp_ping.py");
+                                mTimesValue.setText("10");
+                                break;
+                            case 2:
+                                disableEditText(mDomainName);
+                                disableEditText(mPortValue);
+                                mScriptName.setText("");
+                                mTimesValue.setText("1");
+                                break;
+                            default:
+                                disableEditText(mDomainName);
+                                disableEditText(mPortValue);
+                                mScriptName.setText("");
+                                mTimesValue.setText("1");
+                        }
                     }
                 });
         AlertDialog alertDialog = builder.create();
