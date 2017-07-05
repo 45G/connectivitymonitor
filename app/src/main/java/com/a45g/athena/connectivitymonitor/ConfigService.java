@@ -43,8 +43,12 @@ public class ConfigService extends Service {
 
         saveScripts();
 
-        handleActionMPTCPEnable();
-        handleActionLTEEnable();
+        handleActionMPTCPTestAndEnable();
+
+        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
+            handleActionLTEEnable();
+            handleActionWifiEnable();
+        }
 
         registerReceivers();
     }
@@ -142,7 +146,7 @@ public class ConfigService extends Service {
                 handleActionLTEDisable();
             }
             else if (ACTION_MPTCP_ENABLE.equals(action)){
-                handleActionMPTCPEnable();
+                handleActionMPTCPTestAndEnable();
             }
         }
     }
@@ -150,30 +154,86 @@ public class ConfigService extends Service {
     private void handleActionWifiEnable(){
         String output = sudoForResult("sh "+WIFI_SCRIPT);
         Log.d(LOG_TAG, output);
+        if (output.equals("Please start WiFi\n")){
+            Singleton.setWifi(false);
+            Log.d(LOG_TAG, "WiFi disabled");
+        }
+        else{
+            Singleton.setWifi(true);
+            Log.d(LOG_TAG, "WiFi enabled");
+        }
+
+        Singleton.displayConnectivityStatus();
     }
 
     private void handleActionWifiDisable(){
         String output = sudoForResult("ip rule delete table 2");
         Log.d(LOG_TAG, output);
+        Singleton.setWifi(false);
+
+        Singleton.displayConnectivityStatus();
     }
 
     private void handleActionLTEEnable(){
         String output = sudoForResult("sh "+LTE_SCRIPT);
         Log.d(LOG_TAG, output);
+        if (output.equals("Please start LTE\n")){
+            Singleton.setMobileData(false);
+            Log.d(LOG_TAG, "LTE disabled");
+        }
+        else{
+            Singleton.setMobileData(true);
+            Log.d(LOG_TAG, "LTE enabled");
+        }
+
+        Singleton.displayConnectivityStatus();
     }
 
     private void handleActionLTEDisable(){
         String output = sudoForResult("ip rule delete table 1");
         Log.d(LOG_TAG, output);
+        Singleton.setMobileData(false);
+
+        Singleton.displayConnectivityStatus();
     }
 
-    private void handleActionMPTCPEnable(){
+    private void handleActionMPTCPTestAndEnable(){
         String output = sudoForResult("sysctl net.mptcp.mptcp_enabled");
 
         if (output.equals("net.mptcp.mptcp_enabled = 0\n")){
-            Log.d(LOG_TAG, sudoForResult("sysctl -w net.mptcp.mptcp_enabled=1"));
+            String output2 = sudoForResult("sysctl -w net.mptcp.mptcp_enabled=1");
+            if (output2.equals("net.mptcp.mptcp_enabled = 1\n")){
+                Singleton.setMPTCPSupported(true);
+                Singleton.setMPTCPEnabled(true);
+                Log.d(LOG_TAG, "Enabled MPTCP");
+            }
+            else if(output2.equals("net.mptcp.mptcp_enabled = 0\n")){
+                Singleton.setMPTCPSupported(true);
+                Singleton.setMPTCPEnabled(false);
+                Log.d(LOG_TAG, "MPTCP supported, but cannot be enabled");
+            }
         }
+        else if (output.equals("net.mptcp.mptcp_enabled = 1\n")){
+            Singleton.setMPTCPSupported(true);
+            Singleton.setMPTCPEnabled(true);
+            Log.d(LOG_TAG, "MPTCP is already enabled");
+        }
+        else if (output.equals("sysctl: unknown key \'net.mptcp.mptcp_enabled\'\n")){
+            Singleton.setMPTCPSupported(false);
+            Singleton.setMPTCPEnabled(false);
+            Log.d(LOG_TAG, output);
+            Log.d(LOG_TAG, "MPTCP is not supported");
+        }
+        else{
+            Singleton.setMPTCPSupported(false);
+            Singleton.setMPTCPEnabled(false);
+            Log.d(LOG_TAG, output);
+            Log.d(LOG_TAG, "MPTCP is not supported or some error has occured");
+        }
+
+
     }
+
 
     private void saveScripts(){
         HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_lte, LTE_SCRIPT);
@@ -190,6 +250,7 @@ public class ConfigService extends Service {
         filter.addAction(WifiManager.NETWORK_STATE_CHANGED_ACTION);
         filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
         filter.addAction("android.intent.action.ANY_DATA_STATE");
+        filter.setPriority(-100);
         connReceiver = new ConnectivityReceiver();
         registerReceiver(connReceiver, filter);
     }
