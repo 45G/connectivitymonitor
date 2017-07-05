@@ -12,16 +12,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramSocket;
 import java.net.Socket;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 public class HelperFunctions {
-    private static final String LOG_TAG = HelperFunctions.class.getName();
+    private static final String LOG_TAG = "HelperFunctions";
 
     public static String sudoForResult(String...strings) {
-        String res = "";
+        String res = "This device is not rooted";
         DataOutputStream outputStream = null;
         InputStream response = null;
         try{

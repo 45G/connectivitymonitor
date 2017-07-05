@@ -22,7 +22,7 @@ import static com.a45g.athena.connectivitymonitor.HelperFunctions.getTime;
 public class ConnectivityReceiver
         extends BroadcastReceiver {
     
-    private static final String LOG_TAG = ConnectivityReceiver.class.getName();
+    private static final String LOG_TAG = "ConnectivityReceiver";
 
     private StringBuilder sb = null;
     private String timestamp = null;
@@ -88,7 +88,7 @@ public class ConnectivityReceiver
                     getAllNetworks(context);
 
                     if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-                        if (!Singleton.isWifi()) {
+                        if (!Singleton.isWifiEnabled()) {
                             ConfigService.startActionWifiEnable(context);
                         }
                     }
@@ -106,7 +106,7 @@ public class ConnectivityReceiver
                     displayAllInfo(intent);
 
                     if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-                        if (Singleton.isWifi()) {
+                        if (Singleton.isWifiEnabled()) {
                             ConfigService.startActionWiFiDisable(context);
                         }
                     }
@@ -132,7 +132,7 @@ public class ConnectivityReceiver
                     displayAllInfo(intent);
 
                     if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-                        if (!Singleton.isMobileData()) {
+                        if (!Singleton.isMobileDataEnabled()) {
                             ConfigService.startActionLTEEnable(context);
                         }
                     }
@@ -148,7 +148,7 @@ public class ConnectivityReceiver
                     displayAllInfo(intent);
 
                     if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-                        if (Singleton.isMobileData()) {
+                        if (Singleton.isMobileDataEnabled()) {
                             ConfigService.startActionLTEDisable(context);
                         }
                     }

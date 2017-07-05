@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class OutputFragment extends Fragment {
-    private static final String LOG_TAG = OutputFragment.class.getName();
+    private static final String LOG_TAG = "OutputFragment";
 
     private TextView mOutputText = null;
     private View mScrollView = null;

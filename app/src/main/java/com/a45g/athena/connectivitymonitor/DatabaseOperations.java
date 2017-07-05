@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class DatabaseOperations {
-    private static final String LOG_TAG = DatabaseOperations.class.getName();
+    private static final String LOG_TAG = "DatabaseOperations";
     private SQLiteDatabase mDatabaseUpdate = null;
     private SQLiteUpdateHelper mDatabaseUpdateHelper = null;
     private int mNumUpdateOpened;

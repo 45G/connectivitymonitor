@@ -15,7 +15,7 @@ import android.util.Log;
 import static com.a45g.athena.connectivitymonitor.HelperFunctions.sudoForResult;
 
 public class ConfigService extends Service {
-    private static final String LOG_TAG = ConfigService.class.getName();
+    private static final String LOG_TAG = "ConfigService";
     private static final Integer ID_FOREGROUND = 1890;
 
     private static final String ACTION_WIFI_ENABLE = "com.a45g.athena.connectivitymonitor.action.WIFIENABLE";

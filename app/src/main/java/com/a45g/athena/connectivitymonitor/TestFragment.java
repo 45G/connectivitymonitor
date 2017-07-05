@@ -23,7 +23,7 @@ import static com.a45g.athena.connectivitymonitor.HelperFunctions.sudoForResult;
 
 public class TestFragment extends Fragment {
 
-    private static final String LOG_TAG = TestFragment.class.getName();
+    private static final String LOG_TAG = "TestFragment";
 
     private Button mChooseType = null;
     private TextView mScriptText = null;

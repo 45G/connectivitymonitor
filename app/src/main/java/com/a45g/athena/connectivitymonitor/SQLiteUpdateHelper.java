@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 public class SQLiteUpdateHelper extends SQLiteOpenHelper {
-    private static final String LOG_TAG = SQLiteUpdateHelper.class.getName();
+    private static final String LOG_TAG = "SQLiteUpdateHelper";
 
     private static final String DATABASE_NAME = "connectivitymonitor.db";
     private static final int DATABASE_VERSION = 1;
