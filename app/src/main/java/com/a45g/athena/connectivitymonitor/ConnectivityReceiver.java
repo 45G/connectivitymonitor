@@ -87,13 +87,17 @@ public class ConnectivityReceiver
                     displayAllInfo(intent);
                     getAllNetworks(context);
 
-                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-                        if (!Singleton.isWifiEnabled()) {
+                    if (!Singleton.isWifiEnabled()) {
+                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
                             ConfigService.startActionWifiEnable(context);
                         }
+                        else{
+                            Singleton.setWifi(true);
+                            Singleton.displayConnectivityStatus();
+                        }
+                        insertConnEventInDB("WIFI", "CONNECTED",sb.toString());
                     }
 
-                    insertConnEventInDB("WIFI", "CONNECTED",sb.toString());
                 }
                 else{
                     return;
@@ -105,13 +109,16 @@ public class ConnectivityReceiver
                 if (ni.getTypeName().equals("WIFI")){
                     displayAllInfo(intent);
 
-                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-                        if (Singleton.isWifiEnabled()) {
+                    if (Singleton.isWifiEnabled()) {
+                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
                             ConfigService.startActionWiFiDisable(context);
                         }
+                        else{
+                            Singleton.setWifi(false);
+                            Singleton.displayConnectivityStatus();
+                        }
+                        insertConnEventInDB("WIFI", "DISCONNECTED", sb.toString());
                     }
-
-                    insertConnEventInDB("WIFI", "DISCONNECTED",sb.toString());
                 }
                 else{
                     return;
@@ -131,13 +138,16 @@ public class ConnectivityReceiver
                         ){
                     displayAllInfo(intent);
 
-                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-                        if (!Singleton.isMobileDataEnabled()) {
+                    if (!Singleton.isMobileDataEnabled()) {
+                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
                             ConfigService.startActionLTEEnable(context);
                         }
+                        else{
+                            Singleton.setMobileData(true);
+                            Singleton.displayConnectivityStatus();
+                        }
+                        insertConnEventInDB("LTE", "CONNECTED",sb.toString());
                     }
-
-                    insertConnEventInDB("LTE", "CONNECTED",sb.toString());
                 }
                 else if ((extras.get("state") != null && extras.get("state").equals("DISCONNECTED")) &&
                         (extras.get("apn") != null && extras.get("apn").equals("land")) &&
@@ -147,13 +157,16 @@ public class ConnectivityReceiver
                         ){
                     displayAllInfo(intent);
 
-                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-                        if (Singleton.isMobileDataEnabled()) {
+                    if (Singleton.isMobileDataEnabled()) {
+                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
                             ConfigService.startActionLTEDisable(context);
                         }
+                        else{
+                            Singleton.setMobileData(false);
+                            Singleton.displayConnectivityStatus();
+                        }
+                        insertConnEventInDB("LTE", "DISCONNECTED",sb.toString());
                     }
-
-                    insertConnEventInDB("LTE", "DISCONNECTED",sb.toString());
                 }
                 else {
                     //displayAllInfo(intent);
