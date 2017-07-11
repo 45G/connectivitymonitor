@@ -66,10 +66,12 @@ public class ConnectivityReceiver
         String action = intent.getAction();
         newLine = System.getProperty("line.separator");
 
+        long id = -1;
+
         sb = new StringBuilder();
         sb.append(newLine);
 
-        if (action.equals("android.net.wifi.STATE_CHANGE")) {
+        /*if (action.equals("android.net.wifi.STATE_CHANGE")) {
             NetworkInfo ni = getNetworkInfo(intent);
             if (ni.getState().toString().equals("CONNECTED")) {
                 displayAction(intent);
@@ -79,7 +81,7 @@ public class ConnectivityReceiver
                 return;
             }
         }
-        else
+        else*/
         if (action.equals("android.net.conn.CONNECTIVITY_CHANGE")){
             NetworkInfo ni = getNetworkInfo(intent);
             if (ni.getState().toString().equals("CONNECTED")) {
@@ -95,7 +97,9 @@ public class ConnectivityReceiver
                             Singleton.setWifi(true);
                             Singleton.displayConnectivityStatus();
                         }
-                        insertConnEventInDB("WIFI", "CONNECTED",sb.toString());
+                        id = insertConnEventInDB("WIFI", "CONNECTED",sb.toString());
+                        sendIntentToDisplayInfo(id);
+                        Log.d(LOG_TAG, "Sent msg, id="+id);
                     }
 
                 }
@@ -117,7 +121,9 @@ public class ConnectivityReceiver
                             Singleton.setWifi(false);
                             Singleton.displayConnectivityStatus();
                         }
-                        insertConnEventInDB("WIFI", "DISCONNECTED", sb.toString());
+                        id = insertConnEventInDB("WIFI", "DISCONNECTED", sb.toString());
+                        sendIntentToDisplayInfo(id);
+                        Log.d(LOG_TAG, "Sent msg, id="+id);
                     }
                 }
                 else{
@@ -128,71 +134,78 @@ public class ConnectivityReceiver
                 return;
             }
         }
-        else{
-            if (action.equals("android.intent.action.ANY_DATA_STATE")){
-                Bundle extras = intent.getExtras();
-                if (//(extras.get("reason") != null && extras.get("reason").equals("connected")) &&
-                         (extras.get("state") != null && extras.get("state").equals("CONNECTED")) &&
-                                 (extras.get("apn") != null && extras.get("apn").equals("land")) &&
-                                 (extras.get("apnType") != null && extras.get("apnType").equals("default"))
-                        ){
-                    displayAllInfo(intent);
+        else if (action.equals("android.intent.action.ANY_DATA_STATE")){
+            Bundle extras = intent.getExtras();
+            if (//(extras.get("reason") != null && extras.get("reason").equals("connected")) &&
+                    (extras.get("state") != null && extras.get("state").equals("CONNECTED")) &&
+                            (extras.get("apn") != null && extras.get("apn").equals("land")) &&
+                            (extras.get("apnType") != null && extras.get("apnType").equals("default"))
+                    ){
+                displayAllInfo(intent);
 
-                    if (!Singleton.isMobileDataEnabled()) {
-                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-                            ConfigService.startActionLTEEnable(context);
-                        }
-                        else{
-                            Singleton.setMobileData(true);
-                            Singleton.displayConnectivityStatus();
-                        }
-                        insertConnEventInDB("LTE", "CONNECTED",sb.toString());
+                if (!Singleton.isMobileDataEnabled()) {
+                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
+                        ConfigService.startActionLTEEnable(context);
                     }
-                }
-                else if ((extras.get("state") != null && extras.get("state").equals("DISCONNECTED")) &&
-                        (extras.get("apn") != null && extras.get("apn").equals("land")) &&
-                       // (extras.get("reason") != null && extras.get("reason").equals("specificDisabled")
-                       //         || (extras.get("reason") == null)) &&
-                        (extras.get("apnType") != null && extras.get("apnType").equals("default"))
-                        ){
-                    displayAllInfo(intent);
-
-                    if (Singleton.isMobileDataEnabled()) {
-                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-                            ConfigService.startActionLTEDisable(context);
-                        }
-                        else{
-                            Singleton.setMobileData(false);
-                            Singleton.displayConnectivityStatus();
-                        }
-                        insertConnEventInDB("LTE", "DISCONNECTED",sb.toString());
+                    else{
+                        Singleton.setMobileData(true);
+                        Singleton.displayConnectivityStatus();
                     }
-                }
-                else {
-                    //displayAllInfo(intent);
+                    id = insertConnEventInDB("LTE", "CONNECTED",sb.toString());
+                    sendIntentToDisplayInfo(id);
+                    Log.d(LOG_TAG, "Sent msg, id="+id);
                 }
             }
-            else{
+            else if ((extras.get("state") != null && extras.get("state").equals("DISCONNECTED")) &&
+                    (extras.get("apn") != null && extras.get("apn").equals("land")) &&
+                    // (extras.get("reason") != null && extras.get("reason").equals("specificDisabled")
+                    //         || (extras.get("reason") == null)) &&
+                    (extras.get("apnType") != null && extras.get("apnType").equals("default"))
+                    ){
+                displayAllInfo(intent);
+
+                if (Singleton.isMobileDataEnabled()) {
+                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
+                        ConfigService.startActionLTEDisable(context);
+                    }
+                    else{
+                        Singleton.setMobileData(false);
+                        Singleton.displayConnectivityStatus();
+                    }
+                    id = insertConnEventInDB("LTE", "DISCONNECTED",sb.toString());
+                    sendIntentToDisplayInfo(id);
+                    Log.d(LOG_TAG, "Sent msg, id="+id);
+                }
+            }
+            else {
+                //displayAllInfo(intent);
                 return;
             }
         }
+        else{
+            return;
+        }
 
-        if (sb.toString().equals(newLine)) return;
 
-        sendIntentToDisplayInfo();
+        if (sb.toString().equals(newLine) || id == -1) return;
+
+        //sendIntentToDisplayInfo(id);
     }
 
-    private void insertConnEventInDB(String iface, String event, String details){
+    private long insertConnEventInDB(String iface, String event, String details){
+        long id = -1;
+
         DatabaseOperations databaseOperations = new DatabaseOperations(mContext);
         databaseOperations.openWrite();
-        databaseOperations.insertConnectivityEvent(timestamp, iface, event,details);
+        id = databaseOperations.insertConnectivityEvent(timestamp, iface, event,details);
         databaseOperations.close();
+
+        return id;
     }
 
-    private void sendIntentToDisplayInfo(){
+    private void sendIntentToDisplayInfo(long id){
         Intent i=new Intent("com.a45g.athena.connectivitymonitor.ACTION_DISPLAY");
-        i.putExtra("timestamp", timestamp);
-        i.putExtra("value", sb.toString());
+        i.putExtra("id", id);
         mContext.sendBroadcast(i);
     }
 

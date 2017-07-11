@@ -28,6 +28,10 @@ public class DatabaseOperations {
             SQLiteUpdateHelper.COLUMN_TYPE, SQLiteUpdateHelper.COLUMN_VALUE
     };
 
+    private String[] idColumn = {
+            SQLiteUpdateHelper.COLUMN_ID
+    };
+
     public DatabaseOperations(Context context) {
         mDatabaseUpdateHelper = new SQLiteUpdateHelper(context);
         mNumUpdateOpened = 0;
@@ -40,6 +44,21 @@ public class DatabaseOperations {
                     mDatabaseUpdate = mDatabaseUpdateHelper.getWritableDatabase();
                 } catch (SQLException sqlException) {
                     Log.e(LOG_TAG, "SQL exception thrown while trying to get writable database",
+                            sqlException);
+                    // TODO: Do something in this case.
+                }
+            }
+            mNumUpdateOpened++;
+        }
+    }
+
+    public synchronized void openRead() {
+        if (mDatabaseUpdateHelper != null) {
+            if (mDatabaseUpdate == null) {
+                try {
+                    mDatabaseUpdate = mDatabaseUpdateHelper.getReadableDatabase();
+                } catch (SQLException sqlException) {
+                    Log.e(LOG_TAG, "SQL exception thrown while trying to get readable database",
                             sqlException);
                     // TODO: Do something in this case.
                 }
@@ -118,6 +137,121 @@ public class DatabaseOperations {
         return outputs;
     }
 
+    public List<ConnectivityOutput> getRecentConnectivityOutputs(long id) {
+        if (mDatabaseUpdate == null) {
+            Log.e(LOG_TAG, "getAllResults: Query with database closed.");
+            return null;
+        }
+
+        List<ConnectivityOutput> outputs = new ArrayList<ConnectivityOutput>();
+        String whereClause = SQLiteUpdateHelper.COLUMN_ID + " > '" + id + "'";
+        Cursor cursor = mDatabaseUpdate.query(SQLiteUpdateHelper.TABLE_CONNECTIVITY, allConnectivityColumns,
+                whereClause, null, null, null, null);
+
+        try {
+            if (cursor != null) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    ConnectivityOutput output = cursorToConnectivityOutput(cursor);
+                    outputs.add(output);
+                    cursor.moveToNext();
+                }
+            }
+        } finally {
+            if (cursor != null){
+                cursor.close();
+            }
+        }
+
+        return outputs;
+    }
+
+    public ConnectivityOutput getConnectivityOutputById(long id) {
+        if (mDatabaseUpdate == null) {
+            Log.e(LOG_TAG, "getAllResults: Query with database closed.");
+            return null;
+        }
+
+
+        String whereClause = SQLiteUpdateHelper.COLUMN_ID + " = '" + id + "'";
+        Cursor cursor = mDatabaseUpdate.query(SQLiteUpdateHelper.TABLE_CONNECTIVITY, allConnectivityColumns,
+                whereClause, null, null, null, null);
+
+
+        ConnectivityOutput output = null;
+        try {
+            if (cursor != null) {
+                if (cursor.getCount() > 0) {
+                    cursor.moveToLast();
+                    output = cursorToConnectivityOutput(cursor);
+                }
+            }
+        } finally {
+            if (cursor != null){
+                cursor.close();
+            }
+        }
+
+        return output;
+    }
+
+    public List<ConnectivityOutput> getSomeConnectivityOutputs(int no) {
+        if (mDatabaseUpdate == null) {
+            Log.e(LOG_TAG, "getAllResults: Query with database closed.");
+            return null;
+        }
+
+        List<ConnectivityOutput> outputs = new ArrayList<ConnectivityOutput>();
+
+
+        Cursor cursor = mDatabaseUpdate.query(SQLiteUpdateHelper.TABLE_CONNECTIVITY, allConnectivityColumns,
+                null, null, null, null, "_id DESC", "10");
+
+        try {
+            if (cursor != null) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    ConnectivityOutput output = cursorToConnectivityOutput(cursor);
+                    outputs.add(output);
+                    cursor.moveToNext();
+                }
+            }
+        } finally {
+            if (cursor != null){
+                cursor.close();
+            }
+        }
+
+        return outputs;
+    }
+
+    public long getLastId() {
+        if (mDatabaseUpdate == null) {
+            Log.e(LOG_TAG, "getAllResults: Query with database closed.");
+            return -1;
+        }
+
+        long id = -1;
+
+        Cursor cursor = mDatabaseUpdate.query(SQLiteUpdateHelper.TABLE_CONNECTIVITY, idColumn,
+                null, null, null, null, "_id DESC", "1");
+
+        try {
+            if (cursor != null) {
+                if (cursor.getCount() > 0) {
+                    cursor.moveToLast();
+                    id = cursor.getLong(0);
+                }
+            }
+        } finally {
+            if (cursor != null){
+                cursor.close();
+            }
+        }
+
+        return id;
+    }
+
     private ConnectivityOutput cursorToConnectivityOutput(Cursor cursor) {
         return new ConnectivityOutput(cursor.getLong(0), cursor.getString(1), cursor.getString(2),
                 cursor.getString(3), cursor.getString(4));
@@ -156,7 +290,4 @@ public class DatabaseOperations {
         return new TestOutput(cursor.getLong(0), cursor.getString(1), cursor.getString(2),
                 cursor.getString(3));
     }
-
-
-
 }

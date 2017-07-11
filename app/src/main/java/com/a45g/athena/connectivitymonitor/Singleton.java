@@ -9,6 +9,8 @@ public class Singleton {
     private static boolean mMobileDataEnabled = false;
     private static boolean mMPTCPSupported = false;
     private static boolean mMPTCPEnabled = false;
+    private static String mWiFiIP = null;
+    private static String mMobileIP = null;
 
     /**
      * A private Constructor prevents any other class from instantiating.
@@ -48,6 +50,24 @@ public class Singleton {
     }
 
     public static void displayConnectivityStatus(){
-        Log.d(LOG_TAG, "MPTCP=" + mMPTCPEnabled + " WiFi=" + mWifiEnabled + " LTE=" + mMobileDataEnabled);
+        Log.d(LOG_TAG, "MPTCP=" + mMPTCPEnabled + " WiFi=" + mWifiEnabled + " MobileData=" + mMobileDataEnabled);
+        Log.d(LOG_TAG, "WiFi IP=" + mWiFiIP + " MobileData IP=" + mMobileIP);
+    }
+
+    public static String getWiFiIP() {
+        return mWiFiIP;
+    }
+
+    public static void setWiFiIP(String WiFiIP) {
+        mWiFiIP = WiFiIP;
+    }
+
+
+    public static String getMobileIP() {
+        return mMobileIP;
+    }
+
+    public static void setMobileIP(String MobileIP) {
+        mMobileIP = MobileIP;
     }
 }

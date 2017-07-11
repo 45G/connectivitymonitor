@@ -11,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import java.util.Locale;
 
@@ -34,10 +35,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals("com.a45g.athena.connectivitymonitor.ACTION_DISPLAY")){
-                Bundle extras = intent.getExtras();
-                String time = extras.get("timestamp").toString();
-                String value = extras.get("value").toString();
-                mOutputFragment.addOutput(value, time);
+                long id = intent.getLongExtra("id", -1);
+                if (id != -1) {
+                    mOutputFragment.addOutput(id);
+                    Log.d(LOG_TAG, "Recv msg, id=" + id);
+                }
             }
         }
     };
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
         mOutputFragment = new OutputFragment();
         mTestFragment = new TestFragment();
+
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         mViewPager = (ViewPager) findViewById(R.id.pager);

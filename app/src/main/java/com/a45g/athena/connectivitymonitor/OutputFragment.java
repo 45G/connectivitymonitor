@@ -14,7 +14,10 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+
+import static android.R.attr.id;
 
 public class OutputFragment extends Fragment {
     private static final String LOG_TAG = "OutputFragment";
@@ -29,7 +32,9 @@ public class OutputFragment extends Fragment {
     private Runnable mOutputRunnable = null;
     private Runnable checkScrollRunnable = null;
 
-    private boolean ready = false;
+    private boolean ready = true;
+
+    private long lastId = -1;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -61,6 +66,7 @@ public class OutputFragment extends Fragment {
         });
 
         mOutputCache = new ArrayList<OutputData>();
+        loadPreviousEvents();
         mOutputRunnable = new Runnable() {
             @Override
             public void run() {
@@ -84,6 +90,59 @@ public class OutputFragment extends Fragment {
 
         ready = true;
         Log.d(LOG_TAG, "OutputFragment is ready");
+
+        if (id != -1) loadRecentEvents();
+        appendOutput();
+
+    }
+
+    @Override
+    public void onPause(){
+        super.onPause();
+
+        ready = false;
+        Log.d(LOG_TAG, "OutputFragment is being paused");
+
+    }
+
+    private void loadRecentEvents(){
+        List<ConnectivityOutput> eventsList = null;
+
+        DatabaseOperations databaseOperations = new DatabaseOperations(getContext());
+        databaseOperations.openRead();
+        eventsList = databaseOperations.getRecentConnectivityOutputs(lastId);
+        lastId = databaseOperations.getLastId();
+        databaseOperations.close();
+
+        Collections.reverse(eventsList);
+
+        if (eventsList != null) {
+            for (ConnectivityOutput event : eventsList) {
+                OutputData outputData = new OutputData(event.getDetails(), event.getTimestamp());
+                mOutputCache.add(outputData);
+                Log.d(LOG_TAG, "Cache size=" + mOutputCache.size());
+            }
+        }
+
+    }
+
+    private void loadPreviousEvents(){
+        List<ConnectivityOutput> eventsList = null;
+
+        DatabaseOperations databaseOperations = new DatabaseOperations(getContext());
+        databaseOperations.openRead();
+        eventsList = databaseOperations.getSomeConnectivityOutputs(10);
+        lastId = databaseOperations.getLastId();
+        databaseOperations.close();
+
+        if (eventsList != null) {
+            for (ConnectivityOutput event : eventsList) {
+                OutputData outputData = new OutputData(event.getDetails(), event.getTimestamp());
+                mOutputCache.add(outputData);
+                Log.d(LOG_TAG, "Cache size=" + mOutputCache.size());
+            }
+        }
+
     }
 
     @SuppressLint("SetTextI18n")
@@ -113,17 +172,36 @@ public class OutputFragment extends Fragment {
         }
     }
 
-    public void addOutput(String value, String time){
+    /*public void addOutput(String value, String time){
 
         OutputData output = new OutputData(value, time);
-        if (mOutputCache != null) {
+        if (mOutputCache != null && ready == true) {
             mOutputCache.add(output);
-            // if (mOutputCache.size() > MIN_DISPLAY_SIZE) {
+            Log.d(LOG_TAG, "Recv msg. Cache size="+mOutputCache.size());
             appendOutput();
-            //} else {
-            //this.postDelayed(mOutputRunnable, 500);
-            //}
+        }
+    }*/
 
+    public void addOutput(long id){
+        if (mOutputCache != null && ready == true) {
+            lastId = id;
+            DatabaseOperations databaseOperations = new DatabaseOperations(getContext());
+            databaseOperations.openRead();
+            ConnectivityOutput connectivityOutput = databaseOperations.getConnectivityOutputById(id);
+            databaseOperations.close();
+
+            if (connectivityOutput != null) {
+                OutputData output = new OutputData(connectivityOutput.getDetails(), connectivityOutput.getTimestamp());
+
+                mOutputCache.add(output);
+                Log.d(LOG_TAG, "Recv msg. Cache size=" + mOutputCache.size());
+                appendOutput();
+            }
+        }
+        else{
+            Log.d(LOG_TAG, "Recv msg. Not ready");
         }
     }
+
+
 }
