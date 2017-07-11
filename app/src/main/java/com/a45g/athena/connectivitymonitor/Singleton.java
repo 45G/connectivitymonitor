@@ -51,7 +51,7 @@ public class Singleton {
 
     public static void displayConnectivityStatus(){
         Log.d(LOG_TAG, "MPTCP=" + mMPTCPEnabled + " WiFi=" + mWifiEnabled + " MobileData=" + mMobileDataEnabled);
-        Log.d(LOG_TAG, "WiFi IP=" + mWiFiIP + " MobileData IP=" + mMobileIP);
+        Log.d(LOG_TAG, "WiFiIP=" + mWiFiIP + " MobileDataIP=" + mMobileIP);
     }
 
     public static String getWiFiIP() {

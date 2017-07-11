@@ -5,6 +5,8 @@ echo "Please start WiFi"
 exit 1
 fi
 
+echo ${wlanip}
+
 table2=$(ip rule | grep "lookup 2")
 
 if [ "x${table2}x" != "xx" ]; then

@@ -19,12 +19,16 @@ public class ConfigService extends Service {
 
     private static final String ACTION_WIFI_ENABLE = "com.a45g.athena.connectivitymonitor.action.WIFIENABLE";
     private static final String ACTION_WIFI_DISABLE = "com.a45g.athena.connectivitymonitor.action.WIFIDISABLE";
-    private static final String ACTION_LTE_ENABLE = "com.a45g.athena.connectivitymonitor.action.LTEENABLE";
-    private static final String ACTION_LTE_DISABLE = "com.a45g.athena.connectivitymonitor.action.LTEDISABLE";
+    private static final String ACTION_MOBILE_DATA_ENABLE = "com.a45g.athena.connectivitymonitor.action.LTEENABLE";
+    private static final String ACTION_MOBILE_DATA_DISABLE = "com.a45g.athena.connectivitymonitor.action.LTEDISABLE";
     private static final String ACTION_MPTCP_ENABLE = "com.a45g.athena.connectivitymonitor.action.MPTCPENABLE";
     private static final String ACTION_START_SERVICE = "com.a45g.athena.connectivitymonitor.action.STARTSERVICE";
     private static final String LTE_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/set_mptcp_lte.sh";
     private static final String WIFI_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/set_mptcp_wifi.sh";
+    private static final String LTE_IP_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/get_lte_ip.sh";
+    private static final String WIFI_IP_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/get_wifi_ip.sh";
+
+    private String delims = "\n";
 
     private ConnectivityReceiver connReceiver;
 
@@ -45,7 +49,7 @@ public class ConfigService extends Service {
         handleActionMPTCPTestAndEnable();
 
         if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-            handleActionLTEEnable();
+            handleActionMobileDataEnable();
             handleActionWifiEnable();
         }
 
@@ -107,15 +111,15 @@ public class ConfigService extends Service {
         context.startService(intent);
     }
 
-    public static void startActionLTEEnable(Context context) {
+    public static void startActionMobileDataEnable(Context context) {
         Intent intent = new Intent(context, ConfigService.class);
-        intent.setAction(ACTION_LTE_ENABLE);
+        intent.setAction(ACTION_MOBILE_DATA_ENABLE);
         context.startService(intent);
     }
 
-    public static void startActionLTEDisable(Context context) {
+    public static void startActionMobileDataDisable(Context context) {
         Intent intent = new Intent(context, ConfigService.class);
-        intent.setAction(ACTION_LTE_DISABLE);
+        intent.setAction(ACTION_MOBILE_DATA_DISABLE);
         context.startService(intent);
     }
 
@@ -139,11 +143,11 @@ public class ConfigService extends Service {
             else if (ACTION_WIFI_DISABLE.equals(action)){
                 handleActionWifiDisable();
             }
-            else if (ACTION_LTE_ENABLE.equals(action)){
-                handleActionLTEEnable();
+            else if (ACTION_MOBILE_DATA_ENABLE.equals(action)){
+                handleActionMobileDataEnable();
             }
-            else if (ACTION_LTE_DISABLE.equals(action)){
-                handleActionLTEDisable();
+            else if (ACTION_MOBILE_DATA_DISABLE.equals(action)){
+                handleActionMobileDataDisable();
             }
             else if (ACTION_MPTCP_ENABLE.equals(action)){
                 handleActionMPTCPTestAndEnable();
@@ -154,11 +158,14 @@ public class ConfigService extends Service {
     private void handleActionWifiEnable(){
         String output = sudoForResult("sh "+WIFI_SCRIPT);
         Log.d(LOG_TAG, output);
+
         if (output.equals("Please start WiFi\n")){
             Singleton.setWifi(false);
             Log.d(LOG_TAG, "WiFi disabled");
         }
         else{
+            String[] tokens = output.split(delims);
+            Singleton.setWiFiIP(tokens[0]);
             Singleton.setWifi(true);
             Log.d(LOG_TAG, "WiFi enabled");
         }
@@ -174,28 +181,55 @@ public class ConfigService extends Service {
         Singleton.displayConnectivityStatus();
     }
 
-    private void handleActionLTEEnable(){
+    private void handleActionMobileDataEnable(){
         String output = sudoForResult("sh "+LTE_SCRIPT);
         Log.d(LOG_TAG, output);
-        if (output.equals("Please start LTE\n")){
+
+        if (output.equals("Please start Mobile Data\n")){
             Singleton.setMobileData(false);
-            Log.d(LOG_TAG, "LTE disabled");
+            Log.d(LOG_TAG, "Mobile Data disabled");
         }
         else{
+            String[] tokens = output.split(delims);
+            Singleton.setMobileIP(tokens[0]);
             Singleton.setMobileData(true);
-            Log.d(LOG_TAG, "LTE enabled");
+            Log.d(LOG_TAG, "Mobile Data enabled");
         }
 
         Singleton.displayConnectivityStatus();
     }
 
-    private void handleActionLTEDisable(){
+    private void handleActionMobileDataDisable(){
         String output = sudoForResult("ip rule delete table 1");
         Log.d(LOG_TAG, output);
         Singleton.setMobileData(false);
 
         Singleton.displayConnectivityStatus();
     }
+
+    public String getWiFiIP(){
+        String output = sudoForResult("sh "+WIFI_IP_SCRIPT);
+        Log.d(LOG_TAG, output);
+
+        if (!output.equals("Please start WiFi\n")){
+            String[] tokens = output.split(delims);
+            return tokens[0];
+        }
+        return null;
+    }
+
+    public String getMobileDataIP(){
+        String output = sudoForResult("sh "+LTE_IP_SCRIPT);
+        Log.d(LOG_TAG, output);
+
+        if (!output.equals("Please start Mobile Data\n")){
+            String[] tokens = output.split(delims);
+            return tokens[0];
+        }
+        return null;
+    }
+
+
 
     private void handleActionMPTCPTestAndEnable(){
         String output = sudoForResult("sysctl net.mptcp.mptcp_enabled");
@@ -238,6 +272,8 @@ public class ConfigService extends Service {
     private void saveScripts(){
         HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_lte, LTE_SCRIPT);
         HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_wifi, WIFI_SCRIPT);
+        HelperFunctions.saveScript(getApplicationContext(), R.raw.get_lte_ip, LTE_IP_SCRIPT);
+        HelperFunctions.saveScript(getApplicationContext(), R.raw.get_wifi_ip, WIFI_IP_SCRIPT);
     }
 
     private void testPWD(){

@@ -32,6 +32,8 @@ public class ConnectivityReceiver
 
     private String newLine = null;
 
+    private String delims = " ";
+
     @Override
     public void onReceive(Context context, Intent intent) {
 
@@ -89,6 +91,27 @@ public class ConnectivityReceiver
                     displayAllInfo(intent);
                     getAllNetworks(context);
 
+                    String newIP = getWiFiIP(context);
+
+                    if (Singleton.isWifiEnabled() && newIP.equals(Singleton.getWiFiIP())){
+                        Log.d(LOG_TAG, "WiFi already enabled, same IP address");
+                    }
+                    else if (Singleton.isWifiEnabled() && !newIP.equals(Singleton.getWiFiIP())){
+                        Log.d(LOG_TAG, "WiFi IP has changed");
+                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
+                            ConfigService.startActionWiFiDisable(context);
+                            ConfigService.startActionWifiEnable(context);
+                        }
+                        else{
+                            Singleton.setWifi(true);
+                            Singleton.setWiFiIP(newIP);
+                            Singleton.displayConnectivityStatus();
+                        }
+                        id = insertConnEventInDB("WIFI", "CONNECTED",sb.toString());
+                        sendIntentToDisplayInfo(id);
+                        Log.d(LOG_TAG, "Sent msg, id="+id);
+                    }
+                    else
                     if (!Singleton.isWifiEnabled()) {
                         if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
                             ConfigService.startActionWifiEnable(context);
@@ -121,9 +144,13 @@ public class ConnectivityReceiver
                             Singleton.setWifi(false);
                             Singleton.displayConnectivityStatus();
                         }
+                        Singleton.setWiFiIP(null);
                         id = insertConnEventInDB("WIFI", "DISCONNECTED", sb.toString());
                         sendIntentToDisplayInfo(id);
                         Log.d(LOG_TAG, "Sent msg, id="+id);
+                    }
+                    else{
+                        Log.d(LOG_TAG, "WiFi already disabled");
                     }
                 }
                 else{
@@ -143,15 +170,37 @@ public class ConnectivityReceiver
                     ){
                 displayAllInfo(intent);
 
+                String newIP = getMobileIP();
+                Log.d(LOG_TAG, "new mobile IP="+newIP);
+
+                if (Singleton.isMobileDataEnabled() && newIP.equals(Singleton.getMobileIP())){
+                    Log.d(LOG_TAG, "Mobile Data already enabled, same IP address");
+                }
+                else if (Singleton.isMobileDataEnabled() && !newIP.equals(Singleton.getMobileIP())){
+                    Log.d(LOG_TAG, "Mobile IP has changed");
+                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
+                        ConfigService.startActionMobileDataDisable(context);
+                        ConfigService.startActionMobileDataEnable(context);
+                    }
+                    else{
+                        Singleton.setMobileData(true);
+                        Singleton.setMobileIP(newIP);
+                        Singleton.displayConnectivityStatus();
+                    }
+                    id = insertConnEventInDB("MobileData", "CONNECTED",sb.toString());
+                    sendIntentToDisplayInfo(id);
+                    Log.d(LOG_TAG, "Sent msg, id="+id);
+                }
+                else
                 if (!Singleton.isMobileDataEnabled()) {
                     if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-                        ConfigService.startActionLTEEnable(context);
+                        ConfigService.startActionMobileDataEnable(context);
                     }
                     else{
                         Singleton.setMobileData(true);
                         Singleton.displayConnectivityStatus();
                     }
-                    id = insertConnEventInDB("LTE", "CONNECTED",sb.toString());
+                    id = insertConnEventInDB("MobileData", "CONNECTED",sb.toString());
                     sendIntentToDisplayInfo(id);
                     Log.d(LOG_TAG, "Sent msg, id="+id);
                 }
@@ -166,15 +215,19 @@ public class ConnectivityReceiver
 
                 if (Singleton.isMobileDataEnabled()) {
                     if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
-                        ConfigService.startActionLTEDisable(context);
+                        ConfigService.startActionMobileDataDisable(context);
                     }
                     else{
                         Singleton.setMobileData(false);
                         Singleton.displayConnectivityStatus();
                     }
-                    id = insertConnEventInDB("LTE", "DISCONNECTED",sb.toString());
+                    Singleton.setMobileIP(null);
+                    id = insertConnEventInDB("MobileData", "DISCONNECTED",sb.toString());
                     sendIntentToDisplayInfo(id);
                     Log.d(LOG_TAG, "Sent msg, id="+id);
+                }
+                else{
+                    Log.d(LOG_TAG, "Mobile Data already disabled");
                 }
             }
             else {
@@ -333,6 +386,15 @@ public class ConnectivityReceiver
                 ((i >> 16 ) & 0xFF) + "." +
                 ((i >> 8 ) & 0xFF) + "." +
                 ( i & 0xFF) ;
+    }
+
+    private String getWiFiIP(Context context){
+        WifiManager wifiManager = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        DhcpInfo dhcpInfo = wifiManager.getDhcpInfo();
+        String[] tokens = dhcpInfo.toString().split(delims);
+        //Log.v(LOG_TAG, "Get WiFiIP="+tokens[1]);
+
+        return tokens[1];
     }
 
     public String getMobileIP() {
