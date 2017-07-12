@@ -1,6 +1,8 @@
 package com.a45g.athena.connectivitymonitor;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -94,5 +96,19 @@ public class HelperFunctions {
                 }
             }
         }
+    }
+
+    public static void putValue(Context context, String pref, String value) {
+        SharedPreferences settings = context.getSharedPreferences(
+                context.getString(R.string.settings), Activity.MODE_PRIVATE);
+        SharedPreferences.Editor editor = settings.edit();
+        editor.putString(pref, value);
+        editor.commit();
+    }
+
+    public static String getValue(Context context, String value, String defaultValue) {
+        SharedPreferences settings = context.getSharedPreferences(
+                context.getString(R.string.settings), Activity.MODE_PRIVATE);
+        return settings.getString(value, defaultValue);
     }
 }

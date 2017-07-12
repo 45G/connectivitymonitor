@@ -30,7 +30,11 @@
             android:layout_height="wrap_content"
             android:id="@+id/run_shell_scripts" />
 
-
+        <Button
+            android:text="Save"
+            android:layout_width="100dp"
+            android:layout_height="59dp"
+            android:id="@+id/save" />
     </LinearLayout>
 
 

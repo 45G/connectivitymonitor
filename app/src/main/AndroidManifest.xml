@@ -23,8 +23,8 @@
 
         <service
             android:name=".ConfigService"
-            android:exported="false"
-            android:process=":configservice">
+            android:exported="false">
+            <!--android:process=":configservice"-->
             <intent-filter>
                 <action android:name=".ConfigService" />
             </intent-filter>

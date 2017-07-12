@@ -4,22 +4,15 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
 
-
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link SettingsFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link SettingsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class SettingsFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -30,8 +23,9 @@ public class SettingsFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
-    public TextView mApnText;
-    public CheckBox mRunShellScripts;
+    private TextView mApnText;
+    private CheckBox mRunShellScripts;
+    private Button mSaveButton;
 
 
 
@@ -77,7 +71,21 @@ public class SettingsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_settings, container, false);
         mApnText = (EditText) rootView.findViewById(R.id.apn_to_watch);
         mRunShellScripts = (CheckBox) rootView.findViewById(R.id.run_shell_scripts);
+
+        mSaveButton = (Button) rootView.findViewById(R.id.save);
+        mSaveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {changeApn();}
+        });
+
         return rootView;
+    }
+
+    private void changeApn(){
+        String newApn = mApnText.getText().toString();
+        HelperFunctions.putValue(getContext(), getString(R.string.apn), newApn);
+        Log.d(LOG_TAG, "Saved new APN value " + newApn);
+
     }
 
     // TODO: Rename method, update argument and hook method into UI event

@@ -54,7 +54,7 @@ public class ConfigService extends Service {
         }
 
         registerReceivers();
-
+        setDefaultPreferences();
     }
 
 
@@ -289,5 +289,9 @@ public class ConfigService extends Service {
         filter.setPriority(-100);
         connReceiver = new ConnectivityReceiver();
         registerReceiver(connReceiver, filter);
+    }
+
+    private void setDefaultPreferences(){
+        HelperFunctions.putValue(this, getString(R.string.apn), getString(R.string.defaultApnValue));
     }
 }
