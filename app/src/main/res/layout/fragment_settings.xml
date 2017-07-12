@@ -2,12 +2,36 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.a45g.athena.connectivitymonitor.Settings">
+    tools:context="com.a45g.athena.connectivitymonitor.SettingsFragment">
 
     <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="match_parent">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/default_apn" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:text="land"
+            android:ems="10"
+            android:id="@+id/apn_to_watch" />
+
+        <CheckBox
+            android:text="Run shell scripts[requires ROOT]"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/run_shell_scripts" />
+
+
+    </LinearLayout>
+
 
 </FrameLayout>

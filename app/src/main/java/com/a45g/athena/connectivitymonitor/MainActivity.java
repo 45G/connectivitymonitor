@@ -22,11 +22,13 @@ public class MainActivity extends AppCompatActivity {
 
     private OutputFragment mOutputFragment = null;
     private TestFragment mTestFragment = null;
+    private SettingsFragment mSettingsFragment = null;
 
     final static int OUTPUT_FRAGMENT_INDEX = 0;
     final static int TEST_FRAGMENT_INDEX = 1;
+    final static int SETTINGS_FRAGMENT_INDEX = 2;
 
-    final static int FRAGMENTS_NUMBER = 2;
+    final static int FRAGMENTS_NUMBER = 3;
 
     private IntentFilter mIntentFilter = null;
 
@@ -49,6 +51,7 @@ public class MainActivity extends AppCompatActivity {
 
         mOutputFragment = new OutputFragment();
         mTestFragment = new TestFragment();
+        mSettingsFragment = new SettingsFragment();
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -91,6 +94,11 @@ public class MainActivity extends AppCompatActivity {
         return mTestFragment;
     }
 
+    public SettingsFragment getSettingsFragment() {
+        return mSettingsFragment;
+    }
+
+
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         public SectionsPagerAdapter(FragmentManager fm) {
@@ -107,6 +115,9 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case TEST_FRAGMENT_INDEX:
                     fragment = mTestFragment;
+                    break;
+                case SETTINGS_FRAGMENT_INDEX:
+                    fragment = mSettingsFragment;
                     break;
             }
 
@@ -127,6 +138,8 @@ public class MainActivity extends AppCompatActivity {
                     return getString(R.string.test_fragment_title).toUpperCase(l);
                 case OUTPUT_FRAGMENT_INDEX:
                     return getString(R.string.output_fragment_title).toUpperCase(l);
+                case SETTINGS_FRAGMENT_INDEX:
+                    return getString(R.string.settings_fragment_title).toUpperCase(l);
             }
 
             return null;

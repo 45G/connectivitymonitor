@@ -66,6 +66,9 @@ public class ConnectivityReceiver
         String action = intent.getAction();
         newLine = System.getProperty("line.separator");
 
+        String apn_to_watch  = ((MainActivity)context.getApplicationContext()).getSettingsFragment().mApnText.getText().toString();
+        Log.v(LOG_TAG, "apn_to_watch " + apn_to_watch);
+
         sb = new StringBuilder();
         sb.append(newLine);
 
