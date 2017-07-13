@@ -27,6 +27,7 @@ public class ConfigService extends Service {
     private static final String WIFI_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/set_mptcp_wifi.sh";
     private static final String LTE_IP_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/get_lte_ip.sh";
     private static final String WIFI_IP_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/get_wifi_ip.sh";
+    private static final String URL_SCRIPT = "/sdcard/url.py";
 
     private String delims = "\n";
 
@@ -274,6 +275,7 @@ public class ConfigService extends Service {
         HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_wifi, WIFI_SCRIPT);
         HelperFunctions.saveScript(getApplicationContext(), R.raw.get_lte_ip, LTE_IP_SCRIPT);
         HelperFunctions.saveScript(getApplicationContext(), R.raw.get_wifi_ip, WIFI_IP_SCRIPT);
+        HelperFunctions.saveScript(getApplicationContext(), R.raw.url, URL_SCRIPT);
     }
 
     private void testPWD(){

@@ -28,10 +28,10 @@ public class TestFragment extends Fragment {
     private Button mChooseType = null;
     private TextView mScriptText = null;
     private EditText mScriptName = null;
-    private TextView mDomainText = null;
-    private EditText mDomainName = null;
-    private TextView mPortText = null;
-    private EditText mPortValue = null;
+    private TextView mOption1 = null;
+    private EditText mOption1Value = null;
+    private TextView mOption2 = null;
+    private EditText mOption2Value = null;
     private TextView mTimesText = null;
     private EditText mTimesValue = null;
 
@@ -72,11 +72,11 @@ public class TestFragment extends Fragment {
         mScriptText = (TextView) rootView.findViewById(R.id.scriptText);
         mScriptName = (EditText) rootView.findViewById(R.id.scriptName);
 
-        mDomainText = (TextView) rootView.findViewById(R.id.domainText);
-        mDomainName = (EditText) rootView.findViewById(R.id.domainName);
+        mOption1 = (TextView) rootView.findViewById(R.id.option1);
+        mOption1Value = (EditText) rootView.findViewById(R.id.option1value);
 
-        mPortText = (TextView) rootView.findViewById(R.id.portText);
-        mPortValue = (EditText) rootView.findViewById(R.id.portValue);
+        mOption2 = (TextView) rootView.findViewById(R.id.option2);
+        mOption2Value = (EditText) rootView.findViewById(R.id.option2value);
 
         mTimesText = (TextView) rootView.findViewById(R.id.timesText);
         mTimesValue = (EditText) rootView.findViewById(R.id.timesValue);
@@ -107,8 +107,8 @@ public class TestFragment extends Fragment {
 
                 if (methodIndex == 1){
                     mCmd = methods[methodIndex] +
-                            mScriptName.getText() + " " + mDomainName.getText() + " " +
-                            mPortValue.getText() + " && exit";
+                            mScriptName.getText() + " " + mOption1Value.getText() + " " +
+                            mOption2Value.getText() + " && exit";
                     Log.d(LOG_TAG, "CMD: "+mCmd);
                 }
                 else{
@@ -117,7 +117,12 @@ public class TestFragment extends Fragment {
                     Log.d(LOG_TAG, "CMD: "+mCmd);
                 }
 
-                times = Integer.valueOf(mTimesValue.getText().toString());
+                if (!mTimesValue.getText().toString().equals("")) {
+                    times = Integer.valueOf(mTimesValue.getText().toString());
+                }
+                else{
+                    times = 1;
+                }
 
                 if (times > 0) {
                     task = new ExecuteTask();
@@ -202,17 +207,8 @@ public class TestFragment extends Fragment {
 
         protected String doInBackground(String... params) {
 
-            String output = "";
 
-            String result = sudoForResult(params[0]);
-            String[] lineTokens = result.split("\n");
-
-            if (methodIndex == 1){
-                output = lineTokens[0];
-            }
-            else{
-                output = result;
-            }
+            String output = sudoForResult(params[0]);
 
             Log.d(LOG_TAG, output);
 
@@ -258,26 +254,26 @@ public class TestFragment extends Fragment {
 
                         switch (methodIndex){
                             case 0:
-                                disableEditText(mDomainName);
-                                disableEditText(mPortValue);
+                                disableEditText(mOption1Value);
+                                disableEditText(mOption2Value);
                                 mScriptName.setText("ping -c 3 jepi.cs.pub.ro");
                                 mTimesValue.setText("1");
                                 break;
                             case 1:
-                                enableEditText(mDomainName);
-                                enableEditText(mPortValue);
-                                mScriptName.setText("/sdcard/tcp_ping.py");
-                                mTimesValue.setText("10");
+                                enableEditText(mOption1Value);
+                                enableEditText(mOption2Value);
+                                mScriptName.setText("/sdcard/url.py");
+                                mTimesValue.setText("1");
                                 break;
                             case 2:
-                                disableEditText(mDomainName);
-                                disableEditText(mPortValue);
+                                disableEditText(mOption1Value);
+                                disableEditText(mOption2Value);
                                 mScriptName.setText("");
                                 mTimesValue.setText("1");
                                 break;
                             default:
-                                disableEditText(mDomainName);
-                                disableEditText(mPortValue);
+                                disableEditText(mOption1Value);
+                                disableEditText(mOption2Value);
                                 mScriptName.setText("");
                                 mTimesValue.setText("1");
                         }

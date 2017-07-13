@@ -29,7 +29,7 @@
             android:textAppearance="@style/TextAppearance.AppCompat.Small" />
 
         <TextView
-            android:text="Executable/Script:"
+            android:text="Python Script:"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/scriptText" />
@@ -38,37 +38,37 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
-            android:text="/sdcard/tcp_ping.py"
+            android:text="/sdcard/url.py"
             android:ems="10"
             android:id="@+id/scriptName" />
 
         <TextView
-            android:text="Target IP/Domain:"
+            android:text="Option 1:"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/domainText" />
+            android:id="@+id/option1" />
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
-            android:text="jepi.cs.pub.ro"
+            android:text="-l 2000000"
             android:ems="10"
-            android:id="@+id/domainName" />
+            android:id="@+id/option1value" />
 
         <TextView
-            android:text="Target Port:"
+            android:text="Option 2:"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/portText" />
+            android:id="@+id/option2" />
 
         <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
-            android:text="1889"
+            android:text="-c 10"
             android:ems="10"
-            android:id="@+id/portValue" />
+            android:id="@+id/option2value" />
 
         <TextView
             android:text="Number of Times:"
@@ -80,7 +80,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
-            android:text="10"
+            android:text="1"
             android:ems="10"
             android:id="@+id/timesValue" />
 
