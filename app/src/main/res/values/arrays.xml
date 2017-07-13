@@ -5,4 +5,11 @@
         <item>Python script</item>
         <item>Shell script</item>
     </string-array>
+    <string-array name="scripts_array">
+        <item>/sdcard/url.py</item>
+        <item>/sdcard/tcp_ping.py</item>
+        <item>/sdcard/tfo_client.py</item>
+        <item>curl</item>
+    </string-array>
+
 </resources>

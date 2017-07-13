@@ -28,6 +28,8 @@ public class ConfigService extends Service {
     private static final String LTE_IP_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/get_lte_ip.sh";
     private static final String WIFI_IP_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/get_wifi_ip.sh";
     private static final String URL_SCRIPT = "/sdcard/url.py";
+    private static final String TCP_PING_SCRIPT = "/sdcard/tcp_ping.py";
+    private static final String TFO_CLIENT_SCRIPT = "/sdcard/tfo_client.py";
 
     private String delims = "\n";
 
@@ -230,8 +232,6 @@ public class ConfigService extends Service {
         return null;
     }
 
-
-
     private void handleActionMPTCPTestAndEnable(){
         String output = sudoForResult("sysctl net.mptcp.mptcp_enabled");
 
@@ -265,10 +265,7 @@ public class ConfigService extends Service {
             Log.d(LOG_TAG, output);
             Log.d(LOG_TAG, "MPTCP is not supported or some error has occured");
         }
-
-
     }
-
 
     private void saveScripts(){
         HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_lte, LTE_SCRIPT);
@@ -276,6 +273,8 @@ public class ConfigService extends Service {
         HelperFunctions.saveScript(getApplicationContext(), R.raw.get_lte_ip, LTE_IP_SCRIPT);
         HelperFunctions.saveScript(getApplicationContext(), R.raw.get_wifi_ip, WIFI_IP_SCRIPT);
         HelperFunctions.saveScript(getApplicationContext(), R.raw.url, URL_SCRIPT);
+        HelperFunctions.saveScript(getApplicationContext(), R.raw.tcp_ping, TCP_PING_SCRIPT);
+        HelperFunctions.saveScript(getApplicationContext(), R.raw.tfo_client, TFO_CLIENT_SCRIPT);
     }
 
     private void testPWD(){

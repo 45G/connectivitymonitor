@@ -20,16 +20,30 @@
         tools:context="com.a45g.athena.connectivitymonitor.TestFragment"
         android:weightSum="1">
 
-        <Button
-            android:text="Choose executable/script type"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/chooseType"
-            android:layout_weight="0.40"
-            android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:text="Choose executable/script type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/chooseType"
+                android:layout_weight="0.50"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+
+            <Button
+                android:text="Choose executable/script example"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/chooseScript"
+                android:layout_weight="0.50"
+                android:textAppearance="@style/TextAppearance.AppCompat.Small" />
+        </LinearLayout>
 
         <TextView
-            android:text="Python Script:"
+            android:text="Python script:"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/scriptText" />
@@ -114,12 +128,13 @@
             android:id="@+id/resultText" />
 
         <TextView
+            android:id="@+id/testResult"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textIsSelectable="true"
             android:focusable="true"
             android:longClickable="true"
-            android:id="@+id/testResult" />
+            android:textIsSelectable="true"
+            android:textSize="8sp" />
 
 
     </LinearLayout>

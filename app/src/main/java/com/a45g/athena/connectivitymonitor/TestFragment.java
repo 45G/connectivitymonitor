@@ -20,10 +20,12 @@ import android.widget.TextView;
 
 import static com.a45g.athena.connectivitymonitor.HelperFunctions.getTime;
 import static com.a45g.athena.connectivitymonitor.HelperFunctions.sudoForResult;
+import static com.a45g.athena.connectivitymonitor.HelperFunctions.sudoForResultErr;
 
 public class TestFragment extends Fragment {
 
     private static final String LOG_TAG = "TestFragment";
+    private static final String curl_cmd = "LD_LIBRARY_PATH=/data/data/com.termux/files/usr/lib /data/data/com.termux/files/usr/bin/curl";
 
     private Button mChooseType = null;
     private TextView mScriptText = null;
@@ -41,6 +43,7 @@ public class TestFragment extends Fragment {
     private Button mStartTest = null;
     private Button mStopTest = null;
     private Button mClearOutput = null;
+    private Button mChooseScript = null;
 
     private TextView mResult = null;
     private LinearLayout mLayout = null;
@@ -54,10 +57,15 @@ public class TestFragment extends Fragment {
     private int methodIndex = 1;
     private String[] methodName;
 
+    private String[] scriptName;
+    private int scriptIndex = 0;
+
     private ExecuteTask task = null;
     private boolean cancel = false;
     private int times = 0;
     private String mCmd = null;
+
+    private boolean runCurl = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -66,8 +74,10 @@ public class TestFragment extends Fragment {
 
         methods = new String[]{"", "/data/user/0/org.qpython.qpy/files/bin/qpython-android5.sh ", "sh "};
         methodName = getResources().getStringArray(R.array.execute_array);
-
         mChooseType = (Button) rootView.findViewById(R.id.chooseType);
+
+        scriptName = getResources().getStringArray(R.array.scripts_array);
+        mChooseScript = (Button) rootView.findViewById(R.id.chooseScript);
 
         mScriptText = (TextView) rootView.findViewById(R.id.scriptText);
         mScriptName = (EditText) rootView.findViewById(R.id.scriptName);
@@ -94,7 +104,14 @@ public class TestFragment extends Fragment {
         mChooseType.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showListView();
+                showListViewScriptTypes();
+            }
+        });
+
+        mChooseScript.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showListViewScripts();
             }
         });
 
@@ -113,7 +130,8 @@ public class TestFragment extends Fragment {
                 }
                 else{
                     mCmd = methods[methodIndex] +
-                            mScriptName.getText();
+                            mScriptName.getText() + " " + mOption1Value.getText() + " " +
+                            mOption2Value.getText();
                     Log.d(LOG_TAG, "CMD: "+mCmd);
                 }
 
@@ -207,8 +225,14 @@ public class TestFragment extends Fragment {
 
         protected String doInBackground(String... params) {
 
+            String output = null;
 
-            String output = sudoForResult(params[0]);
+            if (runCurl){
+                output = sudoForResultErr(params[0]);
+            }
+            else{
+                output = sudoForResult(params[0]);
+            }
 
             Log.d(LOG_TAG, output);
 
@@ -241,7 +265,7 @@ public class TestFragment extends Fragment {
         }
     }
 
-    private void showListView() {
+    private void showListViewScriptTypes() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle(R.string.execute)
                 .setItems(R.array.execute_array, new DialogInterface.OnClickListener() {
@@ -254,20 +278,14 @@ public class TestFragment extends Fragment {
 
                         switch (methodIndex){
                             case 0:
-                                disableEditText(mOption1Value);
-                                disableEditText(mOption2Value);
                                 mScriptName.setText("ping -c 3 jepi.cs.pub.ro");
                                 mTimesValue.setText("1");
                                 break;
                             case 1:
-                                enableEditText(mOption1Value);
-                                enableEditText(mOption2Value);
                                 mScriptName.setText("/sdcard/url.py");
                                 mTimesValue.setText("1");
                                 break;
                             case 2:
-                                disableEditText(mOption1Value);
-                                disableEditText(mOption2Value);
                                 mScriptName.setText("");
                                 mTimesValue.setText("1");
                                 break;
@@ -281,6 +299,60 @@ public class TestFragment extends Fragment {
                 });
         AlertDialog alertDialog = builder.create();
         alertDialog.getListView().setSelection(1);
+        alertDialog.show();
+    }
+
+    private void showListViewScripts() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setTitle(R.string.scripts)
+                .setItems(R.array.scripts_array, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        Log.d(LOG_TAG, "Selected option "+which);
+
+                        scriptIndex = which;
+
+                        switch (scriptIndex){
+                            case 0:
+                                mScriptName.setText("/sdcard/url.py");
+                                mOption1Value.setText("-l 2000000");
+                                mOption2Value.setText("-c 10");
+                                mTimesValue.setText("1");
+                                methodIndex = 1;
+                                mScriptText.setText(methodName[methodIndex]+":");
+                                runCurl = false;
+                                break;
+                            case 1:
+                                mScriptName.setText("/sdcard/tcp_ping.py");
+                                mOption1Value.setText("jepi.cs.pub.ro 1234");
+                                mOption2Value.setText("-c 10");
+                                mTimesValue.setText("1");
+                                methodIndex = 1;
+                                mScriptText.setText(methodName[methodIndex]+":");
+                                runCurl = false;
+                                break;
+                            case 2:
+                                mScriptName.setText("/sdcard/tfo_client.py");
+                                mOption1Value.setText("");
+                                mOption2Value.setText("");
+                                mTimesValue.setText("1");
+                                methodIndex = 1;
+                                mScriptText.setText(methodName[methodIndex]+":");
+                                runCurl = false;
+                                break;
+                            default:
+                                mScriptName.setText(curl_cmd);
+                                mOption1Value.setText("jepi.cs.pub.ro/test49.cap");
+                                mOption2Value.setText("> /sdcard/test49.cap");
+                                mTimesValue.setText("1");
+                                methodIndex = 0;
+                                mScriptText.setText(methodName[methodIndex]+":");
+                                runCurl = true;
+                        }
+                    }
+                });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.getListView().setSelection(0);
         alertDialog.show();
     }
 }
