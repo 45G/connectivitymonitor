@@ -3,6 +3,8 @@ package com.a45g.athena.connectivitymonitor;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
@@ -14,6 +16,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.DatagramSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class HelperFunctions {
     private static final String LOG_TAG = "HelperFunctions";
@@ -103,8 +107,8 @@ public class HelperFunctions {
         }
     }
 
-    //public static String getTime(){ return new SimpleDateFormat("HH:mm:ss").format(new Date()); }
-    public static String getTime(){return "" + System.currentTimeMillis() / 1000l;   }
+    public static String getTime(){ return new SimpleDateFormat("HH:mm:ss").format(new Date()); }
+    //public static String getTime(){return "" + System.currentTimeMillis() / 1000l;   }
 
 
     private static void closeSilently(Object... xs) {
@@ -141,5 +145,16 @@ public class HelperFunctions {
         SharedPreferences settings = context.getSharedPreferences(
                 context.getString(R.string.settings), Activity.MODE_PRIVATE);
         return settings.getString(value, defaultValue);
+    }
+
+    public static boolean checkPermission(Context context, String permission){
+        int permissionCheck = ContextCompat.checkSelfPermission(context, permission);
+
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        else{
+            return false;
+        }
     }
 }

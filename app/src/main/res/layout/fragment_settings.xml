@@ -11,6 +11,14 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <CheckBox
+            android:text="Run shell scripts [requires ROOT]"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:id="@+id/run_shell_scripts"
+            />
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -23,12 +31,6 @@
             android:text="land"
             android:ems="10"
             android:id="@+id/apn_to_watch" />
-
-        <CheckBox
-            android:text="Run shell scripts[requires ROOT]"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/run_shell_scripts" />
 
         <Button
             android:text="Save"

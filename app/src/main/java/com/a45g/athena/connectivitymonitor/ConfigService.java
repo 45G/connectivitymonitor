@@ -1,5 +1,6 @@
 package com.a45g.athena.connectivitymonitor;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -49,15 +50,17 @@ public class ConfigService extends Service {
 
         saveScripts();
 
-        handleActionMPTCPTestAndEnable();
+        if (Singleton.hasRootPermission()) {
+            handleActionMPTCPTestAndEnable();
+        }
 
-        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
+        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
+                && Singleton.savedScripts() && Singleton.hasRootPermission()) {
             handleActionMobileDataEnable();
             handleActionWifiEnable();
         }
 
         registerReceivers();
-        setDefaultPreferences();
     }
 
 
@@ -268,13 +271,21 @@ public class ConfigService extends Service {
     }
 
     private void saveScripts(){
-        HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_lte, LTE_SCRIPT);
-        HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_wifi, WIFI_SCRIPT);
-        HelperFunctions.saveScript(getApplicationContext(), R.raw.get_lte_ip, LTE_IP_SCRIPT);
-        HelperFunctions.saveScript(getApplicationContext(), R.raw.get_wifi_ip, WIFI_IP_SCRIPT);
-        HelperFunctions.saveScript(getApplicationContext(), R.raw.url, URL_SCRIPT);
-        HelperFunctions.saveScript(getApplicationContext(), R.raw.tcp_ping, TCP_PING_SCRIPT);
-        HelperFunctions.saveScript(getApplicationContext(), R.raw.tfo_client, TFO_CLIENT_SCRIPT);
+
+        if (HelperFunctions.checkPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)){
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_lte, LTE_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_wifi, WIFI_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.get_lte_ip, LTE_IP_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.get_wifi_ip, WIFI_IP_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.url, URL_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.tcp_ping, TCP_PING_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.tfo_client, TFO_CLIENT_SCRIPT);
+            Singleton.setSavedScripts(true);
+        }
+        else{
+            Log.d(LOG_TAG, "Unable to save scripts, please grant external storage permissions");
+            Singleton.setSavedScripts(false);
+        }
     }
 
     private void testPWD(){
@@ -290,9 +301,5 @@ public class ConfigService extends Service {
         filter.setPriority(-100);
         connReceiver = new ConnectivityReceiver();
         registerReceiver(connReceiver, filter);
-    }
-
-    private void setDefaultPreferences(){
-        HelperFunctions.putValue(this, getString(R.string.apn), getString(R.string.defaultApnValue));
     }
 }

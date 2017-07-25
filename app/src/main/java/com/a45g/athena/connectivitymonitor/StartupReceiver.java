@@ -11,6 +11,9 @@ public class StartupReceiver extends BroadcastReceiver {
         if (Intent.ACTION_BOOT_COMPLETED.equals(intent.getAction())) {
             Intent serviceIntent = new Intent(context, ConfigService.class);
             context.startService(serviceIntent);
+
+            //Intent activityIntent = new Intent(context, MainActivity.class);
+            //context.startActivity(activityIntent);
         }
     }
 }

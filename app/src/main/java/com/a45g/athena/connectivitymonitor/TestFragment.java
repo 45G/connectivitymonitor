@@ -324,7 +324,7 @@ public class TestFragment extends Fragment {
                                 break;
                             case 1:
                                 mScriptName.setText("/sdcard/tcp_ping.py");
-                                mOption1Value.setText("jepi.cs.pub.ro 1234");
+                                mOption1Value.setText("jepi.cs.pub.ro 1889");
                                 mOption2Value.setText("-c 10");
                                 mTimesValue.setText("1");
                                 methodIndex = 1;

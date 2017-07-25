@@ -1,6 +1,7 @@
 package com.a45g.athena.connectivitymonitor;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -71,22 +72,58 @@ public class SettingsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_settings, container, false);
         mApnText = (EditText) rootView.findViewById(R.id.apn_to_watch);
         mRunShellScripts = (CheckBox) rootView.findViewById(R.id.run_shell_scripts);
+        mRunShellScripts.setOnClickListener(checkboxClickListener);
 
         mSaveButton = (Button) rootView.findViewById(R.id.save);
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {changeApn();}
+            public void onClick(View v) {
+                changeApn();
+            }
         });
 
         return rootView;
     }
 
     private void changeApn(){
+        String oldApn = Singleton.getApn();
         String newApn = mApnText.getText().toString();
-        HelperFunctions.putValue(getContext(), getString(R.string.apn), newApn);
-        Log.d(LOG_TAG, "Saved new APN value " + newApn);
+        if (!oldApn.equals(newApn)) {
+            Singleton.setApn(newApn);
+            Log.d(LOG_TAG, "Saved new APN value: " + newApn);
+        }
 
     }
+
+    private void changeRoot(){
+        Boolean oldRootP = Singleton.hasRootPermission();
+        Boolean newRootP = mRunShellScripts.isChecked();
+        if (oldRootP == newRootP) {
+            Singleton.setRootPermission(newRootP);
+            Log.d(LOG_TAG, "Saved new root permission: " + newRootP);
+        }
+    }
+
+    View.OnClickListener checkboxClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            boolean checked = ((CheckBox) view).isChecked();
+            switch (view.getId()){
+                case R.id.run_shell_scripts:
+                    Boolean oldRootP = Singleton.hasRootPermission();
+                    if (oldRootP != checked) {
+                        Singleton.setRootPermission(checked);
+                        Log.d(LOG_TAG, "Saved new root permission: " + checked);
+                        if (checked == true){
+                            getActivity().stopService(new Intent(getContext(), ConfigService.class));
+                            getActivity().startService(new Intent(getContext(), ConfigService.class));
+                        }
+                    }
+                    break;
+            }
+        }
+    };
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {

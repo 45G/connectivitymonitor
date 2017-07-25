@@ -70,9 +70,8 @@ public class ConnectivityReceiver
 
         long id = -1;
 
-        String apnToWatch = HelperFunctions.getValue(context,
-                context.getString(R.string.apn), context.getString(R.string.defaultApnValue));
-        Log.v(LOG_TAG, "APN to watch: " + apnToWatch);
+        String apnToWatch = Singleton.getApn();
+        //Log.v(LOG_TAG, "APN to watch: " + apnToWatch);
 
         sb = new StringBuilder();
         sb.append(newLine);
@@ -102,7 +101,7 @@ public class ConnectivityReceiver
                     }
                     else if (Singleton.isWifiEnabled() && !newIP.equals(Singleton.getWiFiIP())){
                         Log.d(LOG_TAG, "WiFi IP has changed");
-                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
+                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled() && Singleton.savedScripts()) {
                             ConfigService.startActionWiFiDisable(context);
                             ConfigService.startActionWifiEnable(context);
                         }
@@ -117,7 +116,8 @@ public class ConnectivityReceiver
                     }
                     else
                     if (!Singleton.isWifiEnabled()) {
-                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
+                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
+                                && Singleton.savedScripts() && Singleton.hasRootPermission()) {
                             ConfigService.startActionWifiEnable(context);
                         }
                         else{
@@ -141,7 +141,8 @@ public class ConnectivityReceiver
                     displayAllInfo(intent);
 
                     if (Singleton.isWifiEnabled()) {
-                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
+                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
+                                && Singleton.savedScripts() && Singleton.hasRootPermission()) {
                             ConfigService.startActionWiFiDisable(context);
                         }
                         else{
@@ -169,7 +170,7 @@ public class ConnectivityReceiver
             Bundle extras = intent.getExtras();
             if (//(extras.get("reason") != null && extras.get("reason").equals("connected")) &&
                     (extras.get("state") != null && extras.get("state").equals("CONNECTED")) &&
-                            (extras.get("apn") != null && extras.get("apn").equals("land")) &&
+                            (extras.get("apn") != null && extras.get("apn").equals(apnToWatch)) &&
                             (extras.get("apnType") != null && extras.get("apnType").equals("default"))
                     ){
                 displayAllInfo(intent);
@@ -182,7 +183,8 @@ public class ConnectivityReceiver
                 }
                 else if (Singleton.isMobileDataEnabled() && !newIP.equals(Singleton.getMobileIP())){
                     Log.d(LOG_TAG, "Mobile IP has changed");
-                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
+                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
+                            && Singleton.savedScripts() && Singleton.hasRootPermission()) {
                         ConfigService.startActionMobileDataDisable(context);
                         ConfigService.startActionMobileDataEnable(context);
                     }
@@ -197,7 +199,7 @@ public class ConnectivityReceiver
                 }
                 else
                 if (!Singleton.isMobileDataEnabled()) {
-                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
+                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled() && Singleton.savedScripts()) {
                         ConfigService.startActionMobileDataEnable(context);
                     }
                     else{
@@ -210,7 +212,7 @@ public class ConnectivityReceiver
                 }
             }
             else if ((extras.get("state") != null && extras.get("state").equals("DISCONNECTED")) &&
-                    (extras.get("apn") != null && extras.get("apn").equals("land")) &&
+                    (extras.get("apn") != null && extras.get("apn").equals(apnToWatch)) &&
                     // (extras.get("reason") != null && extras.get("reason").equals("specificDisabled")
                     //         || (extras.get("reason") == null)) &&
                     (extras.get("apnType") != null && extras.get("apnType").equals("default"))
@@ -218,7 +220,8 @@ public class ConnectivityReceiver
                 displayAllInfo(intent);
 
                 if (Singleton.isMobileDataEnabled()) {
-                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()) {
+                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
+                            && Singleton.savedScripts() && Singleton.hasRootPermission()) {
                         ConfigService.startActionMobileDataDisable(context);
                     }
                     else{
