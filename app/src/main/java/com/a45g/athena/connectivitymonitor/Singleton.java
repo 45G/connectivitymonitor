@@ -12,8 +12,9 @@ public class Singleton {
     private static String mWiFiIP = null;
     private static String mMobileIP = null;
     private static boolean mSavedScripts = false;
-    private static boolean mRootPermission = true;
+    private static boolean mScriptsNeeded = true;
     private static String mApn = "land";
+    private static boolean mMPTCPNeeded = true;
 
     /**
      * A private Constructor prevents any other class from instantiating.
@@ -82,12 +83,12 @@ public class Singleton {
         mSavedScripts = savedScripts;
     }
 
-    public static boolean hasRootPermission() {
-        return mRootPermission;
+    public static boolean areScriptsNeeded() {
+        return mScriptsNeeded;
     }
 
-    public static void setRootPermission(boolean rootPermission) {
-        mRootPermission = rootPermission;
+    public static void setScriptsNeeded(boolean scriptsNeeded) {
+        mScriptsNeeded = scriptsNeeded;
     }
 
     public static String getApn() {
@@ -96,5 +97,13 @@ public class Singleton {
 
     public static void setApn(String apn) {
         mApn = apn;
+    }
+
+    public static boolean isMPTCPNeeded() {
+        return mMPTCPNeeded;
+    }
+
+    public static void setMPTCPNeeded(boolean MPTCPNeeded) {
+        mMPTCPNeeded = MPTCPNeeded;
     }
 }

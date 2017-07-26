@@ -1,7 +1,6 @@
 package com.a45g.athena.connectivitymonitor;
 
 import android.content.Context;
-import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -13,6 +12,9 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import static android.R.attr.checked;
 
 public class SettingsFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -26,6 +28,7 @@ public class SettingsFragment extends Fragment {
     private String mParam2;
     private TextView mApnText;
     private CheckBox mRunShellScripts;
+    private CheckBox mEnableMPTCP;
     private Button mSaveButton;
 
 
@@ -72,13 +75,14 @@ public class SettingsFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_settings, container, false);
         mApnText = (EditText) rootView.findViewById(R.id.apn_to_watch);
         mRunShellScripts = (CheckBox) rootView.findViewById(R.id.run_shell_scripts);
-        mRunShellScripts.setOnClickListener(checkboxClickListener);
+        mEnableMPTCP = (CheckBox) rootView.findViewById(R.id.enableMPTCP);
 
         mSaveButton = (Button) rootView.findViewById(R.id.save);
         mSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 changeApn();
+                checkboxVerify();
             }
         });
 
@@ -95,34 +99,43 @@ public class SettingsFragment extends Fragment {
 
     }
 
-    private void changeRoot(){
-        Boolean oldRootP = Singleton.hasRootPermission();
-        Boolean newRootP = mRunShellScripts.isChecked();
-        if (oldRootP == newRootP) {
-            Singleton.setRootPermission(newRootP);
-            Log.d(LOG_TAG, "Saved new root permission: " + newRootP);
-        }
-    }
+    private void checkboxVerify(){
+        boolean checkboxMPTCP = mEnableMPTCP.isChecked();
+        boolean checkboxScripts = mRunShellScripts.isChecked();
+        boolean oldConfigMPTCP = Singleton.isMPTCPNeeded();
+        boolean oldConfigScripts = Singleton.areScriptsNeeded();
 
-    View.OnClickListener checkboxClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            boolean checked = ((CheckBox) view).isChecked();
-            switch (view.getId()){
-                case R.id.run_shell_scripts:
-                    Boolean oldRootP = Singleton.hasRootPermission();
-                    if (oldRootP != checked) {
-                        Singleton.setRootPermission(checked);
-                        Log.d(LOG_TAG, "Saved new root permission: " + checked);
-                        if (checked == true){
-                            getActivity().stopService(new Intent(getContext(), ConfigService.class));
-                            getActivity().startService(new Intent(getContext(), ConfigService.class));
-                        }
-                    }
-                    break;
+        if (oldConfigMPTCP != checkboxMPTCP) {
+            Singleton.setMPTCPNeeded(checkboxMPTCP);
+            Log.d(LOG_TAG, "Saved new value - MPTCP needed: " + checked);
+            if (checkboxMPTCP == false) {
+                ConfigService.startActionMPTCPDisable(getContext());
+                Toast.makeText(getContext(), "Disabled MPTCP",
+                        Toast.LENGTH_SHORT).show();
+            }
+            else{
+                ConfigService.startActionMPTCPEnable(getContext());
+                Toast.makeText(getContext(), "Enabled MPTCP",
+                        Toast.LENGTH_SHORT).show();
             }
         }
-    };
+        if (oldConfigScripts != checkboxScripts) {
+            Singleton.setScriptsNeeded(checkboxScripts);
+            Log.d(LOG_TAG, "Saved new value - run config scripts: " + checked);
+            if (checkboxScripts == false){
+                ConfigService.startActionMobileDataDisable(getContext());
+                ConfigService.startActionWiFiDisable(getContext());
+                Toast.makeText(getContext(), "Disabled MPTCP configuration scripts",
+                        Toast.LENGTH_SHORT).show();
+            }
+            else{
+                ConfigService.startActionMobileDataEnable(getContext());
+                ConfigService.startActionWifiEnable(getContext());
+                Toast.makeText(getContext(), "Enabled MPTCP configuration scripts",
+                        Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
 
     // TODO: Rename method, update argument and hook method into UI event

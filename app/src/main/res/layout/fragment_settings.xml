@@ -12,7 +12,15 @@
         android:layout_height="match_parent">
 
         <CheckBox
-            android:text="Run shell scripts [requires ROOT]"
+            android:text="Enable MPTCP [requires ROOT]"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:id="@+id/enableMPTCP"
+            />
+
+        <CheckBox
+            android:text="Run MPTCP configuration scripts [requires ROOT]"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:checked="true"

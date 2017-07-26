@@ -116,8 +116,9 @@ public class ConnectivityReceiver
                     }
                     else
                     if (!Singleton.isWifiEnabled()) {
-                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
-                                && Singleton.savedScripts() && Singleton.hasRootPermission()) {
+                        if (Singleton.isMPTCPNeeded() && Singleton.areScriptsNeeded()
+                                && Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
+                                && Singleton.savedScripts()) {
                             ConfigService.startActionWifiEnable(context);
                         }
                         else{
@@ -141,8 +142,9 @@ public class ConnectivityReceiver
                     displayAllInfo(intent);
 
                     if (Singleton.isWifiEnabled()) {
-                        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
-                                && Singleton.savedScripts() && Singleton.hasRootPermission()) {
+                        if (Singleton.isMPTCPNeeded() && Singleton.areScriptsNeeded()
+                                && Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
+                                && Singleton.savedScripts()) {
                             ConfigService.startActionWiFiDisable(context);
                         }
                         else{
@@ -183,8 +185,9 @@ public class ConnectivityReceiver
                 }
                 else if (Singleton.isMobileDataEnabled() && !newIP.equals(Singleton.getMobileIP())){
                     Log.d(LOG_TAG, "Mobile IP has changed");
-                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
-                            && Singleton.savedScripts() && Singleton.hasRootPermission()) {
+                    if (Singleton.isMPTCPNeeded() && Singleton.areScriptsNeeded()
+                            && Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
+                            && Singleton.savedScripts()) {
                         ConfigService.startActionMobileDataDisable(context);
                         ConfigService.startActionMobileDataEnable(context);
                     }
@@ -220,8 +223,9 @@ public class ConnectivityReceiver
                 displayAllInfo(intent);
 
                 if (Singleton.isMobileDataEnabled()) {
-                    if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
-                            && Singleton.savedScripts() && Singleton.hasRootPermission()) {
+                    if (Singleton.isMPTCPNeeded() && Singleton.areScriptsNeeded()
+                            && Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
+                            && Singleton.savedScripts()) {
                         ConfigService.startActionMobileDataDisable(context);
                     }
                     else{

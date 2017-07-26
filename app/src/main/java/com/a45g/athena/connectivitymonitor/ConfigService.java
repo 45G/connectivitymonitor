@@ -23,6 +23,7 @@ public class ConfigService extends Service {
     private static final String ACTION_MOBILE_DATA_ENABLE = "com.a45g.athena.connectivitymonitor.action.LTEENABLE";
     private static final String ACTION_MOBILE_DATA_DISABLE = "com.a45g.athena.connectivitymonitor.action.LTEDISABLE";
     private static final String ACTION_MPTCP_ENABLE = "com.a45g.athena.connectivitymonitor.action.MPTCPENABLE";
+    private static final String ACTION_MPTCP_DISABLE = "com.a45g.athena.connectivitymonitor.action.MPTCPDISABLE";
     private static final String ACTION_START_SERVICE = "com.a45g.athena.connectivitymonitor.action.STARTSERVICE";
     private static final String LTE_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/set_mptcp_lte.sh";
     private static final String WIFI_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/set_mptcp_wifi.sh";
@@ -50,14 +51,14 @@ public class ConfigService extends Service {
 
         saveScripts();
 
-        if (Singleton.hasRootPermission()) {
+        if (Singleton.isMPTCPNeeded()) {
             handleActionMPTCPTestAndEnable();
-        }
 
-        if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
-                && Singleton.savedScripts() && Singleton.hasRootPermission()) {
-            handleActionMobileDataEnable();
-            handleActionWifiEnable();
+            if (Singleton.isMPTCPSupported() && Singleton.isMPTCPEnabled()
+                    && Singleton.savedScripts() && Singleton.areScriptsNeeded()) {
+                handleActionMobileDataEnable();
+                handleActionWifiEnable();
+            }
         }
 
         registerReceivers();
@@ -130,9 +131,14 @@ public class ConfigService extends Service {
     }
 
     public static void startActionMPTCPEnable(Context context) {
-
         Intent intent = new Intent(context, ConfigService.class);
         intent.setAction(ACTION_MPTCP_ENABLE);
+        context.startService(intent);
+    }
+
+    public static void startActionMPTCPDisable(Context context) {
+        Intent intent = new Intent(context, ConfigService.class);
+        intent.setAction(ACTION_MPTCP_DISABLE);
         context.startService(intent);
     }
 
@@ -157,6 +163,9 @@ public class ConfigService extends Service {
             }
             else if (ACTION_MPTCP_ENABLE.equals(action)){
                 handleActionMPTCPTestAndEnable();
+            }
+            else if (ACTION_MPTCP_DISABLE.equals(action)){
+                handleActionMPTCPDisable();
             }
         }
     }
@@ -270,6 +279,34 @@ public class ConfigService extends Service {
         }
     }
 
+    private void handleActionMPTCPDisable(){
+        String output = sudoForResult("sysctl net.mptcp.mptcp_enabled");
+
+        if (output.equals("net.mptcp.mptcp_enabled = 1\n")){
+            String output2 = sudoForResult("sysctl -w net.mptcp.mptcp_enabled=0");
+            if (output2.equals("net.mptcp.mptcp_enabled = 0\n")){
+                Singleton.setMPTCPEnabled(false);
+                Log.d(LOG_TAG, "Disabled MPTCP");
+            }
+        }
+        else if (output.equals("net.mptcp.mptcp_enabled = 0\n")){
+            Singleton.setMPTCPEnabled(false);
+            Log.d(LOG_TAG, "MPTCP is already disabled");
+        }
+        else if (output.equals("sysctl: unknown key \'net.mptcp.mptcp_enabled\'\n")){
+            Singleton.setMPTCPSupported(false);
+            Singleton.setMPTCPEnabled(false);
+            Log.d(LOG_TAG, output);
+            Log.d(LOG_TAG, "MPTCP is not supported");
+        }
+        else{
+            Singleton.setMPTCPSupported(false);
+            Singleton.setMPTCPEnabled(false);
+            Log.d(LOG_TAG, output);
+            Log.d(LOG_TAG, "MPTCP is not supported or some error has occured");
+        }
+    }
+
     private void saveScripts(){
 
         if (HelperFunctions.checkPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)){
@@ -301,5 +338,12 @@ public class ConfigService extends Service {
         filter.setPriority(-100);
         connReceiver = new ConnectivityReceiver();
         registerReceiver(connReceiver, filter);
+    }
+
+    private void MPTCPCleanup(){
+        handleActionWifiDisable();
+        handleActionMobileDataDisable();
+        handleActionMPTCPDisable();
+        Log.d(LOG_TAG, "Disabled MPTCP and cleaned up routing tables");
     }
 }

@@ -1,8 +1,6 @@
 package com.a45g.athena.connectivitymonitor;
 
-import android.app.Activity;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -133,7 +131,7 @@ public class HelperFunctions {
         }
     }
 
-    public static void putValue(Context context, String pref, String value) {
+    /*public static void putValue(Context context, String pref, String value) {
         SharedPreferences settings = context.getSharedPreferences(
                 context.getString(R.string.settings), Activity.MODE_PRIVATE);
         SharedPreferences.Editor editor = settings.edit();
@@ -145,7 +143,7 @@ public class HelperFunctions {
         SharedPreferences settings = context.getSharedPreferences(
                 context.getString(R.string.settings), Activity.MODE_PRIVATE);
         return settings.getString(value, defaultValue);
-    }
+    }*/
 
     public static boolean checkPermission(Context context, String permission){
         int permissionCheck = ContextCompat.checkSelfPermission(context, permission);
