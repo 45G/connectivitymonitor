@@ -23,6 +23,11 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
     public static final String COLUMN_TYPE = "type";
     public static final String COLUMN_VALUE = "value";
 
+    public static final String TABLE_BYTES = "transmitted_bytes";
+    public static final String COLUMN_RX_WLAN = "rx_wlan";
+    public static final String COLUMN_RX_LTE = "rx_lte";
+    public static final String COLUMN_TX_WLAN = "tx_wlan";
+    public static final String COLUMN_TX_LTE = "tx_lte";
 
     private static final String CONNECTIVITY_CREATE = "CREATE TABLE IF NOT EXISTS "
             + TABLE_CONNECTIVITY + "("
@@ -38,6 +43,15 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
             + COLUMN_TIMESTAMP + " string not null, "
             + COLUMN_TYPE + " string not null, "
             + COLUMN_VALUE + " string not null);";
+
+    private static final String BYTES_CREATE = "CREATE TABLE IF NOT EXISTS "
+            + TABLE_BYTES + "("
+            + COLUMN_ID + " integer primary key autoincrement, "
+            + COLUMN_TIMESTAMP + " string not null, "
+            + COLUMN_RX_WLAN + " string not null, "
+            + COLUMN_RX_LTE + " string not null, "
+            + COLUMN_TX_WLAN + " string not null, "
+            + COLUMN_TX_LTE + " string not null);";
 
 
     public SQLiteUpdateHelper(Context context) {
@@ -60,12 +74,21 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
         database.execSQL("DROP TABLE IF EXISTS " + TABLE_TESTS);
     }
 
+    public void createBytes(SQLiteDatabase database) {
+        database.execSQL(BYTES_CREATE);
+    }
+
+    public void deleteBytes(SQLiteDatabase database) {
+        database.execSQL("DROP TABLE IF EXISTS " + TABLE_BYTES);
+    }
+
     @Override
     public void onCreate(SQLiteDatabase database) {
         Log.d(LOG_TAG, "Creating tables in " + DATABASE_NAME);
 
         createConnectivity(database);
         createTests(database);
+        createBytes(database);
     }
 
     public void onDelete(SQLiteDatabase database) {
@@ -73,6 +96,7 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
 
         deleteConnectivity(database);
         deleteTests(database);
+        deleteBytes(database);
     }
 
     @Override

@@ -52,7 +52,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPersonName"
-            android:text="/sdcard/url.py"
+            android:text="/sdcard/45g/url.py"
             android:ems="10"
             android:id="@+id/scriptName" />
 

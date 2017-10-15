@@ -8,9 +8,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import java.io.File;
+import android.os.Environment;
+import android.widget.Toast;
 
 import static com.a45g.athena.connectivitymonitor.HelperFunctions.sudoForResult;
 
@@ -25,13 +29,7 @@ public class ConfigService extends Service {
     private static final String ACTION_MPTCP_ENABLE = "com.a45g.athena.connectivitymonitor.action.MPTCPENABLE";
     private static final String ACTION_MPTCP_DISABLE = "com.a45g.athena.connectivitymonitor.action.MPTCPDISABLE";
     private static final String ACTION_START_SERVICE = "com.a45g.athena.connectivitymonitor.action.STARTSERVICE";
-    private static final String LTE_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/set_mptcp_lte.sh";
-    private static final String WIFI_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/set_mptcp_wifi.sh";
-    private static final String LTE_IP_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/get_lte_ip.sh";
-    private static final String WIFI_IP_SCRIPT = "/data/data/com.a45g.athena.connectivitymonitor/get_wifi_ip.sh";
-    private static final String URL_SCRIPT = "/sdcard/url.py";
-    private static final String TCP_PING_SCRIPT = "/sdcard/tcp_ping.py";
-    private static final String TFO_CLIENT_SCRIPT = "/sdcard/tfo_client.py";
+
 
     private String delims = "\n";
 
@@ -62,6 +60,8 @@ public class ConfigService extends Service {
         }
 
         registerReceivers();
+
+        periodicTasks();
     }
 
 
@@ -171,7 +171,7 @@ public class ConfigService extends Service {
     }
 
     private void handleActionWifiEnable(){
-        String output = sudoForResult("sh "+WIFI_SCRIPT);
+        String output = sudoForResult("sh "+Singleton.WIFI_SCRIPT);
         Log.d(LOG_TAG, output);
 
         if (output.equals("Please start WiFi\n")){
@@ -197,7 +197,7 @@ public class ConfigService extends Service {
     }
 
     private void handleActionMobileDataEnable(){
-        String output = sudoForResult("sh "+LTE_SCRIPT);
+        String output = sudoForResult("sh "+Singleton.LTE_SCRIPT);
         Log.d(LOG_TAG, output);
 
         if (output.equals("Please start Mobile Data\n")){
@@ -223,7 +223,7 @@ public class ConfigService extends Service {
     }
 
     public String getWiFiIP(){
-        String output = sudoForResult("sh "+WIFI_IP_SCRIPT);
+        String output = sudoForResult("sh "+Singleton.WIFI_IP_SCRIPT);
         Log.d(LOG_TAG, output);
 
         if (!output.equals("Please start WiFi\n")){
@@ -234,7 +234,7 @@ public class ConfigService extends Service {
     }
 
     public String getMobileDataIP(){
-        String output = sudoForResult("sh "+LTE_IP_SCRIPT);
+        String output = sudoForResult("sh "+Singleton.LTE_IP_SCRIPT);
         Log.d(LOG_TAG, output);
 
         if (!output.equals("Please start Mobile Data\n")){
@@ -309,14 +309,22 @@ public class ConfigService extends Service {
 
     private void saveScripts(){
 
+
         if (HelperFunctions.checkPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE)){
-            HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_lte, LTE_SCRIPT);
-            HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_wifi, WIFI_SCRIPT);
-            HelperFunctions.saveScript(getApplicationContext(), R.raw.get_lte_ip, LTE_IP_SCRIPT);
-            HelperFunctions.saveScript(getApplicationContext(), R.raw.get_wifi_ip, WIFI_IP_SCRIPT);
-            HelperFunctions.saveScript(getApplicationContext(), R.raw.url, URL_SCRIPT);
-            HelperFunctions.saveScript(getApplicationContext(), R.raw.tcp_ping, TCP_PING_SCRIPT);
-            HelperFunctions.saveScript(getApplicationContext(), R.raw.tfo_client, TFO_CLIENT_SCRIPT);
+
+            File f = new File(Environment.getExternalStorageDirectory(), Singleton.folder45g);
+            if (!f.exists()) {
+                f.mkdirs();
+            }
+
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_lte, Singleton.LTE_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_wifi, Singleton.WIFI_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.get_lte_ip, Singleton.LTE_IP_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.get_wifi_ip, Singleton.WIFI_IP_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.get_bytes, Singleton.GET_BYTES_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.url, Singleton.URL_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.tcp_ping, Singleton.TCP_PING_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.tfo_client, Singleton.TFO_CLIENT_SCRIPT);
             Singleton.setSavedScripts(true);
         }
         else{
@@ -345,5 +353,76 @@ public class ConfigService extends Service {
         handleActionMobileDataDisable();
         handleActionMPTCPDisable();
         Log.d(LOG_TAG, "Disabled MPTCP and cleaned up routing tables");
+    }
+
+    private void periodicTasks(){
+        final Handler handler=new Handler();
+        Runnable runnableCode = new Runnable() {
+            @Override
+            public void run() {
+                storeBytes(getBytes());
+                handler.postDelayed(this, 30000);
+            }
+        };
+        handler.post(runnableCode);
+    }
+
+    private String getBytes(){
+        String output = sudoForResult(Singleton.PYTHON+" "+Singleton.GET_BYTES_SCRIPT+" && exit");
+        String[] tokens = output.split(delims);
+        return tokens[0];
+    }
+
+    private void storeBytes(String result){
+
+        String[] tokens = result.split(" ");
+
+        String timestamp = tokens[0];
+        int rx_wlan = Integer.parseInt(tokens[1]);
+        int rx_lte = Integer.parseInt(tokens[2]);
+        int tx_wlan = Integer.parseInt(tokens[3]);
+        int tx_lte = Integer.parseInt(tokens[4]);
+
+        int rx_wlan_dif = 0;
+        int rx_lte_dif = 0;
+        int tx_wlan_dif = 0;
+        int tx_lte_dif = 0;
+
+        if (!Singleton.empty_bytes) {
+            rx_wlan_dif = rx_wlan - Singleton.getRxWlan();
+            rx_lte_dif = rx_lte - Singleton.getRxLte();
+            tx_wlan_dif = tx_wlan - Singleton.getTxWlan();
+            tx_lte_dif = tx_lte - Singleton.getTxLte();
+
+            if ((rx_wlan_dif > 10000) || (tx_wlan_dif > 10000)){
+                Log.d(LOG_TAG, "Network traffic on WiFi");
+            }
+            if ((rx_lte_dif > 10000) || (tx_lte_dif > 10000)){
+                Log.d(LOG_TAG, "Network traffic on LTE");
+            }
+        }
+
+        Singleton.setRxWlan(rx_wlan);
+        Singleton.setRxLte(rx_lte);
+        Singleton.setTxWlan(tx_wlan);
+        Singleton.setTxLte(tx_lte);
+
+        Log.d(LOG_TAG, timestamp + " Total: " + rx_wlan + " "
+                + rx_lte + " " + tx_wlan + " " + tx_lte);
+
+        if (!Singleton.empty_bytes) {
+            Log.d(LOG_TAG, timestamp + " Differences: " + rx_wlan_dif + " "
+                    + rx_lte_dif + " " + tx_wlan_dif + " " + tx_lte_dif);
+
+            DatabaseOperations databaseOperations = new DatabaseOperations(getApplicationContext());
+            databaseOperations.openWrite();
+            databaseOperations.insertBytesResult(timestamp,
+                    Integer.toString(rx_wlan_dif), Integer.toString(rx_lte_dif),
+                    Integer.toString(tx_wlan_dif), Integer.toString(tx_lte_dif));
+            databaseOperations.close();
+        }
+        else{
+            Singleton.empty_bytes = false;
+        }
     }
 }

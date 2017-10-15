@@ -28,6 +28,12 @@ public class DatabaseOperations {
             SQLiteUpdateHelper.COLUMN_TYPE, SQLiteUpdateHelper.COLUMN_VALUE
     };
 
+    private String[] allBytesColumns = {
+            SQLiteUpdateHelper.COLUMN_ID, SQLiteUpdateHelper.COLUMN_TIMESTAMP,
+            SQLiteUpdateHelper.COLUMN_RX_WLAN, SQLiteUpdateHelper.COLUMN_RX_LTE,
+            SQLiteUpdateHelper.COLUMN_TX_WLAN, SQLiteUpdateHelper.COLUMN_TX_LTE
+    };
+
     private String[] idColumn = {
             SQLiteUpdateHelper.COLUMN_ID
     };
@@ -107,6 +113,23 @@ public class DatabaseOperations {
         values.put(SQLiteUpdateHelper.COLUMN_VALUE, value);
 
         return mDatabaseUpdate.insert(SQLiteUpdateHelper.TABLE_TESTS, null, values);
+    }
+
+    public long insertBytesResult(String timestamp, String rx_wlan, String rx_lte,
+                                  String tx_wlan, String tx_lte) {
+        if (mDatabaseUpdate == null) {
+            Log.e(LOG_TAG, "Insert with database closed.");
+            return -1;
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(SQLiteUpdateHelper.COLUMN_TIMESTAMP, timestamp);
+        values.put(SQLiteUpdateHelper.COLUMN_RX_WLAN, rx_wlan);
+        values.put(SQLiteUpdateHelper.COLUMN_RX_LTE, rx_lte);
+        values.put(SQLiteUpdateHelper.COLUMN_TX_WLAN, tx_wlan);
+        values.put(SQLiteUpdateHelper.COLUMN_TX_LTE, tx_lte);
+
+        return mDatabaseUpdate.insert(SQLiteUpdateHelper.TABLE_BYTES, null, values);
     }
 
     public List<ConnectivityOutput> getAllConnectivityOutputs() {

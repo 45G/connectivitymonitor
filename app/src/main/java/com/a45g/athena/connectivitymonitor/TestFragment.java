@@ -25,7 +25,6 @@ import static com.a45g.athena.connectivitymonitor.HelperFunctions.sudoForResultE
 public class TestFragment extends Fragment {
 
     private static final String LOG_TAG = "TestFragment";
-    private static final String curl_cmd = "LD_LIBRARY_PATH=/data/data/com.termux/files/usr/lib /data/data/com.termux/files/usr/bin/curl";
 
     private Button mChooseType = null;
     private TextView mScriptText = null;
@@ -282,7 +281,7 @@ public class TestFragment extends Fragment {
                                 mTimesValue.setText("1");
                                 break;
                             case 1:
-                                mScriptName.setText("/sdcard/url.py");
+                                mScriptName.setText(Singleton.URL_SCRIPT);
                                 mTimesValue.setText("1");
                                 break;
                             case 2:
@@ -314,7 +313,7 @@ public class TestFragment extends Fragment {
 
                         switch (scriptIndex){
                             case 0:
-                                mScriptName.setText("/sdcard/url.py");
+                                mScriptName.setText(Singleton.URL_SCRIPT);
                                 mOption1Value.setText("-l 2000000");
                                 mOption2Value.setText("-c 10");
                                 mTimesValue.setText("1");
@@ -323,7 +322,7 @@ public class TestFragment extends Fragment {
                                 runCurl = false;
                                 break;
                             case 1:
-                                mScriptName.setText("/sdcard/tcp_ping.py");
+                                mScriptName.setText(Singleton.TCP_PING_SCRIPT);
                                 mOption1Value.setText("jepi.cs.pub.ro 1889");
                                 mOption2Value.setText("-c 10");
                                 mTimesValue.setText("1");
@@ -332,7 +331,7 @@ public class TestFragment extends Fragment {
                                 runCurl = false;
                                 break;
                             case 2:
-                                mScriptName.setText("/sdcard/tfo_client.py");
+                                mScriptName.setText(Singleton.TFO_CLIENT_SCRIPT);
                                 mOption1Value.setText("");
                                 mOption2Value.setText("");
                                 mTimesValue.setText("1");
@@ -341,7 +340,7 @@ public class TestFragment extends Fragment {
                                 runCurl = false;
                                 break;
                             default:
-                                mScriptName.setText(curl_cmd);
+                                mScriptName.setText(Singleton.curl_cmd);
                                 mOption1Value.setText("jepi.cs.pub.ro/test49.cap");
                                 mOption2Value.setText("> /sdcard/test49.cap");
                                 mTimesValue.setText("1");
