@@ -105,15 +105,15 @@ public class HelperFunctions {
         }
     }
 
-    public static String getTime(){ return new SimpleDateFormat("HH:mm:ss").format(new Date()); }
-    //public static String getTime(){return "" + System.currentTimeMillis() / 1000l;   }
+    //public static String getTime(){ return new SimpleDateFormat("HH:mm:ss").format(new Date()); }
+    public static String getTime(){return "" + System.currentTimeMillis() / 1000l;   }
 
 
     private static void closeSilently(Object... xs) {
         for (Object x : xs) {
             if (x != null) {
                 try {
-                    Log.d(LOG_TAG, "closing: " + x);
+                    //Log.d(LOG_TAG, "closing: " + x);
                     if (x instanceof Closeable) {
                         ((Closeable) x).close();
                     } else if (x instanceof Socket) {

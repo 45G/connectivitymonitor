@@ -8,13 +8,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellInfoLte;
+import android.telephony.CellSignalStrengthGsm;
+import android.telephony.CellSignalStrengthLte;
 import android.util.Log;
 import java.io.File;
 import android.os.Environment;
 import android.widget.Toast;
+import android.telephony.TelephonyManager;
 
 import static com.a45g.athena.connectivitymonitor.HelperFunctions.sudoForResult;
 
@@ -30,10 +37,14 @@ public class ConfigService extends Service {
     private static final String ACTION_MPTCP_DISABLE = "com.a45g.athena.connectivitymonitor.action.MPTCPDISABLE";
     private static final String ACTION_START_SERVICE = "com.a45g.athena.connectivitymonitor.action.STARTSERVICE";
 
+    private StringBuilder sb = null;
+    private String newLine = null;
+    private String timestamp = null;
 
     private String delims = "\n";
 
     private ConnectivityReceiver connReceiver;
+
 
     @Nullable
     @Override
@@ -321,6 +332,8 @@ public class ConfigService extends Service {
             HelperFunctions.saveScript(getApplicationContext(), R.raw.set_mptcp_wifi, Singleton.WIFI_SCRIPT);
             HelperFunctions.saveScript(getApplicationContext(), R.raw.get_lte_ip, Singleton.LTE_IP_SCRIPT);
             HelperFunctions.saveScript(getApplicationContext(), R.raw.get_wifi_ip, Singleton.WIFI_IP_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.get_wifi_gateway, Singleton.WIFI_GATE_SCRIPT);
+            HelperFunctions.saveScript(getApplicationContext(), R.raw.get_lte_gateway, Singleton.LTE_GATE_SCRIPT);
             HelperFunctions.saveScript(getApplicationContext(), R.raw.get_bytes, Singleton.GET_BYTES_SCRIPT);
             HelperFunctions.saveScript(getApplicationContext(), R.raw.url, Singleton.URL_SCRIPT);
             HelperFunctions.saveScript(getApplicationContext(), R.raw.tcp_ping, Singleton.TCP_PING_SCRIPT);
@@ -356,32 +369,48 @@ public class ConfigService extends Service {
     }
 
     private void periodicTasks(){
-        final Handler handler=new Handler();
+        final Handler handler = new Handler();
         Runnable runnableCode = new Runnable() {
             @Override
             public void run() {
-                storeBytes(getBytes());
+                if (HelperFunctions.checkPermission(getApplicationContext(), Manifest.permission.ACCESS_COARSE_LOCATION)) {
+
+                    timestamp = HelperFunctions.getTime();
+                    Log.d(LOG_TAG, "Starting data collection at: " + timestamp);
+
+                    getBytes();
+                    getRTT();
+                    getRSSI();
+                    saveCollectedData();
+
+                    if (!Singleton.empty_bytes) {
+                        displayInfo();
+                    }
+                }
+
                 handler.postDelayed(this, 30000);
             }
         };
         handler.post(runnableCode);
     }
 
-    private String getBytes(){
-        String output = sudoForResult(Singleton.PYTHON+" "+Singleton.GET_BYTES_SCRIPT+" && exit");
-        String[] tokens = output.split(delims);
-        return tokens[0];
+    private void displayInfo(){
+        Intent i=new Intent("com.a45g.athena.connectivitymonitor.ACTION_DISPLAY");
+        i.putExtra("timestamp", timestamp);
+        getApplicationContext().sendBroadcast(i);
     }
 
-    private void storeBytes(String result){
+    private void getBytes(){
+        String output = sudoForResult(Singleton.PYTHON+" "+Singleton.GET_BYTES_SCRIPT+" && exit");
 
-        String[] tokens = result.split(" ");
+        String[] tokens1 = output.split(delims);
+        String[] tokens2 = tokens1[0].split(" ");
 
-        String timestamp = tokens[0];
-        int rx_wlan = Integer.parseInt(tokens[1]);
-        int rx_lte = Integer.parseInt(tokens[2]);
-        int tx_wlan = Integer.parseInt(tokens[3]);
-        int tx_lte = Integer.parseInt(tokens[4]);
+        String timestamp = tokens2[0];
+        int rx_wlan = Integer.parseInt(tokens2[1]);
+        int rx_lte = Integer.parseInt(tokens2[2]);
+        int tx_wlan = Integer.parseInt(tokens2[3]);
+        int tx_lte = Integer.parseInt(tokens2[4]);
 
         int rx_wlan_dif = 0;
         int rx_lte_dif = 0;
@@ -394,12 +423,15 @@ public class ConfigService extends Service {
             tx_wlan_dif = tx_wlan - Singleton.getTxWlan();
             tx_lte_dif = tx_lte - Singleton.getTxLte();
 
-            if ((rx_wlan_dif > 10000) || (tx_wlan_dif > 10000)){
-                Log.d(LOG_TAG, "Network traffic on WiFi");
-            }
-            if ((rx_lte_dif > 10000) || (tx_lte_dif > 10000)){
-                Log.d(LOG_TAG, "Network traffic on LTE");
-            }
+            Singleton.setRx_wlan_dif(rx_wlan_dif);
+            Singleton.setRx_lte_dif(rx_lte_dif);
+            Singleton.setTx_wlan_dif(tx_wlan_dif);
+            Singleton.setTx_lte_dif(tx_lte_dif);
+
+            String differences = " Differences: " + rx_wlan_dif + " "
+                    + rx_lte_dif + " " + tx_wlan_dif + " " + tx_lte_dif;
+
+            Log.d(LOG_TAG, timestamp + differences);
         }
 
         Singleton.setRxWlan(rx_wlan);
@@ -409,20 +441,119 @@ public class ConfigService extends Service {
 
         Log.d(LOG_TAG, timestamp + " Total: " + rx_wlan + " "
                 + rx_lte + " " + tx_wlan + " " + tx_lte);
+    }
 
+    private void getRTT(){
+        boolean setRTT = false;
+
+        if (Singleton.isWifiEnabled()) {
+            String output = sudoForResult("sh " + Singleton.WIFI_GATE_SCRIPT);
+            Log.d(LOG_TAG, "WiFi gateway: " + output);
+            Singleton.setWiFiIPGateway(output);
+
+            if (Singleton.getWiFiIPGateway() != null) {
+                output = sudoForResult("ping -c 1 " + Singleton.getWiFiIPGateway());
+                //Log.d(LOG_TAG, output);
+
+                String[] tokens1 = output.split(delims);
+                if ((tokens1.length > 1) && (tokens1[1] != null)) {
+                    String[] tokens2 = tokens1[1].split(" ");
+                    if ((tokens2.length >= 7) && (tokens2[6] != null)) {
+                        String[] tokens3 = tokens2[6].split("=");
+                        if ((tokens3.length > 1) && (tokens3[1] != null)){
+                            Log.d(LOG_TAG, "WiFi RTT: " + tokens3[1]);
+                            Singleton.setRtt_wlan(Float.parseFloat(tokens3[1]));
+                            setRTT = true;
+                        }
+                    }
+                }
+
+
+            }
+        }
+        if (setRTT == false){
+            Singleton.setRtt_wlan(0);
+        }
+
+        setRTT = false;
+
+        if (Singleton.isMobileDataEnabled()) {
+            String output = sudoForResult("sh " + Singleton.LTE_GATE_SCRIPT);
+            Log.d(LOG_TAG, "LTE gateway: " + output);
+            Singleton.setLTEIPGateway(output);
+
+            /*if (Singleton.getLTEIPGateway() != null) {
+                output = sudoForResult("ping -c 1 " + Singleton.getLTEIPGateway());
+                Log.d(LOG_TAG, output);
+
+                String[] tokens1 = output.split(delims);
+                if ((tokens1.length > 1) && (tokens1[1] != null)) {
+                    String[] tokens2 = tokens1[1].split(" ");
+                    if ((tokens2.length >= 7) && (tokens2[6] != null)) {
+                        String[] tokens3 = tokens2[6].split("=");
+                        if ((tokens3.length > 1) && (tokens3[1] != null)){
+                            Log.d(LOG_TAG, "LTE RTT="+tokens3[1]);
+                            Singleton.setRtt_lte(Float.parseFloat(tokens3[1]));
+                            setRTT = true;
+                        }
+                    }
+                }
+
+
+            }*/
+        }
+        if (setRTT == false){
+            Singleton.setRtt_lte(0);
+        }
+    }
+
+    private void getRSSI(){
+        if (Singleton.isWifiEnabled()) {
+            WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+            WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+            int wifiRSSI = wifiInfo.getRssi();
+            Singleton.setRssi_wlan(wifiRSSI);
+
+            Log.d(LOG_TAG, "WiFi RSSI: " + wifiRSSI +
+                    " Link speed: " + wifiInfo.getLinkSpeed() +
+                    " Frequency: " + wifiInfo.getFrequency());
+        }
+        else{
+            Singleton.setRssi_wlan(0);
+        }
+
+        if (Singleton.isMobileDataEnabled()){
+            TelephonyManager telephonyManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
+            CellInfoLte cellinfolte = (CellInfoLte)telephonyManager.getAllCellInfo().get(0);
+            CellSignalStrengthLte cellSignalStrengthLte = cellinfolte.getCellSignalStrength();
+            int LTERSSI = cellSignalStrengthLte.getDbm();
+            Singleton.setRssi_lte(LTERSSI);
+
+            Log.d(LOG_TAG, "LTE RSSI: " + LTERSSI);
+        }
+        else{
+            Singleton.setRssi_lte(0);
+        }
+    }
+
+    private void saveCollectedData(){
         if (!Singleton.empty_bytes) {
-            Log.d(LOG_TAG, timestamp + " Differences: " + rx_wlan_dif + " "
-                    + rx_lte_dif + " " + tx_wlan_dif + " " + tx_lte_dif);
-
             DatabaseOperations databaseOperations = new DatabaseOperations(getApplicationContext());
             databaseOperations.openWrite();
-            databaseOperations.insertBytesResult(timestamp,
-                    Integer.toString(rx_wlan_dif), Integer.toString(rx_lte_dif),
-                    Integer.toString(tx_wlan_dif), Integer.toString(tx_lte_dif));
+            databaseOperations.insertCollectedData(timestamp,
+                    Integer.toString(Singleton.getRx_wlan_dif()),
+                    Integer.toString(Singleton.getRx_lte_dif()),
+                    Integer.toString(Singleton.getTx_wlan_dif()),
+                    Integer.toString(Singleton.getTx_lte_dif()),
+                    Integer.toString(Singleton.getRssi_wlan()),
+                    Integer.toString(Singleton.getRssi_lte()),
+                    Float.toString(Singleton.getRtt_wlan()),
+                    Float.toString(Singleton.getRtt_lte()));
             databaseOperations.close();
         }
         else{
             Singleton.empty_bytes = false;
         }
     }
+
 }

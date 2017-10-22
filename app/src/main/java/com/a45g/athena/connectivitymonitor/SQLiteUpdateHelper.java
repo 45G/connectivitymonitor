@@ -23,11 +23,18 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
     public static final String COLUMN_TYPE = "type";
     public static final String COLUMN_VALUE = "value";
 
-    public static final String TABLE_BYTES = "transmitted_bytes";
+    public static final String TABLE_COLLECTED_DATA = "collected_data";
     public static final String COLUMN_RX_WLAN = "rx_wlan";
     public static final String COLUMN_RX_LTE = "rx_lte";
     public static final String COLUMN_TX_WLAN = "tx_wlan";
     public static final String COLUMN_TX_LTE = "tx_lte";
+
+    public static final String COLUMN_RSSI_WLAN = "rssi_wlan";
+    public static final String COLUMN_RSSI_LTE = "rssi_lte";
+
+    public static final String COLUMN_RTT_WLAN = "rtt_wlan";
+    public static final String COLUMN_RTT_LTE = "rtt_lte";
+
 
     private static final String CONNECTIVITY_CREATE = "CREATE TABLE IF NOT EXISTS "
             + TABLE_CONNECTIVITY + "("
@@ -44,14 +51,18 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
             + COLUMN_TYPE + " string not null, "
             + COLUMN_VALUE + " string not null);";
 
-    private static final String BYTES_CREATE = "CREATE TABLE IF NOT EXISTS "
-            + TABLE_BYTES + "("
+    private static final String COLLECTED_DATA_CREATE = "CREATE TABLE IF NOT EXISTS "
+            + TABLE_COLLECTED_DATA + "("
             + COLUMN_ID + " integer primary key autoincrement, "
             + COLUMN_TIMESTAMP + " string not null, "
             + COLUMN_RX_WLAN + " string not null, "
             + COLUMN_RX_LTE + " string not null, "
             + COLUMN_TX_WLAN + " string not null, "
-            + COLUMN_TX_LTE + " string not null);";
+            + COLUMN_TX_LTE + " string not null, "
+            + COLUMN_RSSI_WLAN + " string not null, "
+            + COLUMN_RSSI_LTE + " string not null, "
+            + COLUMN_RTT_WLAN + " string not null, "
+            + COLUMN_RTT_LTE + " string not null);";
 
 
     public SQLiteUpdateHelper(Context context) {
@@ -75,11 +86,11 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
     }
 
     public void createBytes(SQLiteDatabase database) {
-        database.execSQL(BYTES_CREATE);
+        database.execSQL(COLLECTED_DATA_CREATE);
     }
 
     public void deleteBytes(SQLiteDatabase database) {
-        database.execSQL("DROP TABLE IF EXISTS " + TABLE_BYTES);
+        database.execSQL("DROP TABLE IF EXISTS " + TABLE_COLLECTED_DATA);
     }
 
     @Override

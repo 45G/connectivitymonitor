@@ -19,12 +19,25 @@ public class Singleton {
     private static int rx_lte = 0;
     private static int tx_wlan = 0;
     private static int tx_lte = 0;
+    private static int rx_wlan_dif = 0;
+    private static int rx_lte_dif = 0;
+    private static int tx_wlan_dif = 0;
+    private static int tx_lte_dif = 0;
     public static boolean empty_bytes = true;
+    private static String mWiFiIPGateway = null;
+    private static String mLTEIPGateway = null;
+    private static float rtt_wlan = 0;
+    private static float rtt_lte = 0;
+    private static int rssi_wlan = 0;
+    private static int rssi_lte = 0;
+
 
     static final String LTE_SCRIPT = "/sdcard/45g/set_mptcp_lte.sh";
     static final String WIFI_SCRIPT = "/sdcard/45g/set_mptcp_wifi.sh";
     static final String LTE_IP_SCRIPT = "/sdcard/45g/get_lte_ip.sh";
+    static final String LTE_GATE_SCRIPT = "/sdcard/45g/get_lte_gateway.sh";
     static final String WIFI_IP_SCRIPT = "/sdcard/45g/get_wifi_ip.sh";
+    static final String WIFI_GATE_SCRIPT = "/sdcard/45g/get_wifi_gateway.sh";
     static final String GET_BYTES_SCRIPT = "/sdcard/45g/get_bytes.py";
     static final String URL_SCRIPT = "/sdcard/45g/url.py";
     static final String TCP_PING_SCRIPT = "/sdcard/45g/tcp_ping.py";
@@ -155,5 +168,85 @@ public class Singleton {
 
     public static void setTxLte(int tx_lte) {
         Singleton.tx_lte = tx_lte;
+    }
+
+    public static String getWiFiIPGateway() {
+        return mWiFiIPGateway;
+    }
+
+    public static void setWiFiIPGateway(String WiFiIPGateway) {
+        Singleton.mWiFiIPGateway = WiFiIPGateway;
+    }
+
+    public static String getLTEIPGateway() {
+        return mLTEIPGateway;
+    }
+
+    public static void setLTEIPGateway(String LTEIPGateway) {
+        Singleton.mLTEIPGateway = LTEIPGateway;
+    }
+
+    public static float getRtt_wlan() {
+        return rtt_wlan;
+    }
+
+    public static void setRtt_wlan(float rtt_wlan) {
+        Singleton.rtt_wlan = rtt_wlan;
+    }
+
+    public static float getRtt_lte() {
+        return rtt_lte;
+    }
+
+    public static void setRtt_lte(float rtt_lte) {
+        Singleton.rtt_lte = rtt_lte;
+    }
+
+    public static int getRx_wlan_dif() {
+        return rx_wlan_dif;
+    }
+
+    public static void setRx_wlan_dif(int rx_wlan_dif) {
+        Singleton.rx_wlan_dif = rx_wlan_dif;
+    }
+
+    public static int getRx_lte_dif() {
+        return rx_lte_dif;
+    }
+
+    public static void setRx_lte_dif(int rx_lte_dif) {
+        Singleton.rx_lte_dif = rx_lte_dif;
+    }
+
+    public static int getTx_wlan_dif() {
+        return tx_wlan_dif;
+    }
+
+    public static void setTx_wlan_dif(int tx_wlan_dif) {
+        Singleton.tx_wlan_dif = tx_wlan_dif;
+    }
+
+    public static int getTx_lte_dif() {
+        return tx_lte_dif;
+    }
+
+    public static void setTx_lte_dif(int tx_lte_dif) {
+        Singleton.tx_lte_dif = tx_lte_dif;
+    }
+
+    public static int getRssi_wlan() {
+        return rssi_wlan;
+    }
+
+    public static void setRssi_wlan(int rssi_wlan) {
+        Singleton.rssi_wlan = rssi_wlan;
+    }
+
+    public static int getRssi_lte() {
+        return rssi_lte;
+    }
+
+    public static void setRssi_lte(int rssi_lte) {
+        Singleton.rssi_lte = rssi_lte;
     }
 }

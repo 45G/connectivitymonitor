@@ -35,7 +35,7 @@ public class MainActivity extends AppCompatActivity {
 
     final static int FRAGMENTS_NUMBER = 3;
 
-    final private static int MY_PERMISSIONS_REQUEST_WRITE_SDCARD = 123;
+    final private static int MY_PERMISSIONS_REQUEST = 126;
 
 
     private IntentFilter mIntentFilter = null;
@@ -44,11 +44,18 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals("com.a45g.athena.connectivitymonitor.ACTION_DISPLAY")){
+                //Log.d(LOG_TAG, intent.toUri(0));
                 long id = intent.getLongExtra("id", -1);
+                String timestamp = intent.getStringExtra("timestamp");
                 if (id != -1) {
-                    mOutputFragment.addOutput(id);
-                    Log.d(LOG_TAG, "Recv msg, id=" + id);
+                    mOutputFragment.addOutputById(id);
+                    //Log.d(LOG_TAG, "Recv msg, id=" + id);
                 }
+                else if (timestamp != null){
+                    mOutputFragment.addOutputByTime(timestamp);
+                    //Log.d(LOG_TAG, "Recv msg, time=" + timestamp);
+                }
+
             }
         }
     };
@@ -72,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         createDBHelper.onCreate(database);
         //createDBHelper.onUpgrade(database, 1, 2);
 
-        requestSdcardPermissions();
+        requestAllPermissions();
 
         //ConfigService.startService(getApplicationContext());
 
@@ -158,43 +165,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void requestSdcardPermissions() {
+    private void requestAllPermissions(){
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.READ_PHONE_STATE, Manifest.permission.WRITE_EXTERNAL_STORAGE}, MY_PERMISSIONS_REQUEST);
 
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-
-                // Show an explanation to the user *asynchronously* -- don't block
-                // this thread waiting for the user's response! After the user
-                // sees the explanation, try again to request the permission.
-
-            } else {
-                // No explanation needed, we can request the permission.
-                ActivityCompat.requestPermissions(this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                        MY_PERMISSIONS_REQUEST_WRITE_SDCARD);
-            }
-        }
-        else{
-            Log.d(LOG_TAG, "Sdcard permission already granted");
-            ConfigService.startService(getApplicationContext());
-        }
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[], int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
         switch (requestCode) {
-            case MY_PERMISSIONS_REQUEST_WRITE_SDCARD: {
-                // If request is cancelled, the result arrays are empty.
+            case MY_PERMISSIONS_REQUEST: {
                 if (grantResults.length > 0
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d(LOG_TAG, "Sdcard permission granted");
+                    Log.d(LOG_TAG, "Permission granted");
                     ConfigService.startService(getApplicationContext());
                 } else {
-                    Log.d(LOG_TAG, "Sdcard permission not granted");
+                    Log.d(LOG_TAG, "Permission not granted");
                     //Do smth
                 }
                 return;

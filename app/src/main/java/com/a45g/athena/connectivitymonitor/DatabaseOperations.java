@@ -28,10 +28,12 @@ public class DatabaseOperations {
             SQLiteUpdateHelper.COLUMN_TYPE, SQLiteUpdateHelper.COLUMN_VALUE
     };
 
-    private String[] allBytesColumns = {
+    private String[] allCollectedDataColumns = {
             SQLiteUpdateHelper.COLUMN_ID, SQLiteUpdateHelper.COLUMN_TIMESTAMP,
             SQLiteUpdateHelper.COLUMN_RX_WLAN, SQLiteUpdateHelper.COLUMN_RX_LTE,
-            SQLiteUpdateHelper.COLUMN_TX_WLAN, SQLiteUpdateHelper.COLUMN_TX_LTE
+            SQLiteUpdateHelper.COLUMN_TX_WLAN, SQLiteUpdateHelper.COLUMN_TX_LTE,
+            SQLiteUpdateHelper.COLUMN_RSSI_WLAN, SQLiteUpdateHelper.COLUMN_RSSI_LTE,
+            SQLiteUpdateHelper.COLUMN_RTT_WLAN, SQLiteUpdateHelper.COLUMN_RTT_LTE
     };
 
     private String[] idColumn = {
@@ -115,8 +117,9 @@ public class DatabaseOperations {
         return mDatabaseUpdate.insert(SQLiteUpdateHelper.TABLE_TESTS, null, values);
     }
 
-    public long insertBytesResult(String timestamp, String rx_wlan, String rx_lte,
-                                  String tx_wlan, String tx_lte) {
+    public long insertCollectedData(String timestamp, String rx_wlan, String rx_lte,
+                                    String tx_wlan, String tx_lte, String rssi_wlan,
+                                    String rssi_lte, String rtt_wlan, String rtt_lte) {
         if (mDatabaseUpdate == null) {
             Log.e(LOG_TAG, "Insert with database closed.");
             return -1;
@@ -128,8 +131,12 @@ public class DatabaseOperations {
         values.put(SQLiteUpdateHelper.COLUMN_RX_LTE, rx_lte);
         values.put(SQLiteUpdateHelper.COLUMN_TX_WLAN, tx_wlan);
         values.put(SQLiteUpdateHelper.COLUMN_TX_LTE, tx_lte);
+        values.put(SQLiteUpdateHelper.COLUMN_RSSI_WLAN, rssi_wlan);
+        values.put(SQLiteUpdateHelper.COLUMN_RSSI_LTE, rssi_lte);
+        values.put(SQLiteUpdateHelper.COLUMN_RTT_WLAN, rtt_wlan);
+        values.put(SQLiteUpdateHelper.COLUMN_RTT_LTE, rtt_lte);
 
-        return mDatabaseUpdate.insert(SQLiteUpdateHelper.TABLE_BYTES, null, values);
+        return mDatabaseUpdate.insert(SQLiteUpdateHelper.TABLE_COLLECTED_DATA, null, values);
     }
 
     public List<ConnectivityOutput> getAllConnectivityOutputs() {
@@ -191,7 +198,7 @@ public class DatabaseOperations {
 
     public ConnectivityOutput getConnectivityOutputById(long id) {
         if (mDatabaseUpdate == null) {
-            Log.e(LOG_TAG, "getAllResults: Query with database closed.");
+            Log.e(LOG_TAG, "getConnectivityOutputById: Query with database closed.");
             return null;
         }
 
@@ -217,6 +224,69 @@ public class DatabaseOperations {
 
         return output;
     }
+
+    public List<ConnectivityOutput> getConnectivityOutputByTime(String timestamp) {
+        if (mDatabaseUpdate == null) {
+            Log.e(LOG_TAG, "getConnectivityOutputByTime: Query with database closed.");
+            return null;
+        }
+
+        String whereClause = SQLiteUpdateHelper.COLUMN_TIMESTAMP + " >= '" + timestamp + "'";
+        Cursor cursor = mDatabaseUpdate.query(SQLiteUpdateHelper.TABLE_CONNECTIVITY, allConnectivityColumns,
+                whereClause, null, null, null, null);
+
+
+        List<ConnectivityOutput> outputs = new ArrayList<ConnectivityOutput>();
+
+        try {
+            if (cursor != null) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    ConnectivityOutput output = cursorToConnectivityOutput(cursor);
+                    outputs.add(output);
+                    cursor.moveToNext();
+                }
+            }
+        } finally {
+            if (cursor != null){
+                cursor.close();
+            }
+        }
+
+        return outputs;
+    }
+
+    public List<CollectedDataOutput> getCollectedDataOutputByTime(String timestamp) {
+        if (mDatabaseUpdate == null) {
+            Log.e(LOG_TAG, "getCollectedDataOutputByTime: Query with database closed.");
+            return null;
+        }
+
+        String whereClause = SQLiteUpdateHelper.COLUMN_TIMESTAMP + "='" + timestamp + "'";
+        Cursor cursor = mDatabaseUpdate.query(SQLiteUpdateHelper.TABLE_COLLECTED_DATA, allCollectedDataColumns,
+                whereClause, null, null, null, null);
+
+
+        List<CollectedDataOutput> outputs = new ArrayList<CollectedDataOutput>();
+
+        try {
+            if (cursor != null) {
+                cursor.moveToFirst();
+                while (!cursor.isAfterLast()) {
+                    CollectedDataOutput output = cursorToCollectedDataOutput(cursor);
+                    outputs.add(output);
+                    cursor.moveToNext();
+                }
+            }
+        } finally {
+            if (cursor != null){
+                cursor.close();
+            }
+        }
+
+        return outputs;
+    }
+
 
     public List<ConnectivityOutput> getSomeConnectivityOutputs(int no) {
         if (mDatabaseUpdate == null) {
@@ -312,5 +382,11 @@ public class DatabaseOperations {
     private TestOutput cursorToTestOutput(Cursor cursor) {
         return new TestOutput(cursor.getLong(0), cursor.getString(1), cursor.getString(2),
                 cursor.getString(3));
+    }
+
+    private CollectedDataOutput cursorToCollectedDataOutput(Cursor cursor) {
+        return new CollectedDataOutput(cursor.getLong(0), cursor.getString(1), cursor.getString(2),
+                cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6),
+                cursor.getString(7), cursor.getString(8), cursor.getString(9));
     }
 }

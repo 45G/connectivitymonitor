@@ -120,7 +120,7 @@ public class OutputFragment extends Fragment {
             for (ConnectivityOutput event : eventsList) {
                 OutputData outputData = new OutputData(event.getDetails(), event.getTimestamp());
                 mOutputCache.add(outputData);
-                Log.d(LOG_TAG, "Cache size=" + mOutputCache.size());
+                //Log.d(LOG_TAG, "Cache size=" + mOutputCache.size());
             }
         }
 
@@ -139,7 +139,7 @@ public class OutputFragment extends Fragment {
             for (ConnectivityOutput event : eventsList) {
                 OutputData outputData = new OutputData(event.getDetails(), event.getTimestamp());
                 mOutputCache.add(outputData);
-                Log.d(LOG_TAG, "Cache size=" + mOutputCache.size());
+                //Log.d(LOG_TAG, "Cache size=" + mOutputCache.size());
             }
         }
 
@@ -182,7 +182,7 @@ public class OutputFragment extends Fragment {
         }
     }*/
 
-    public void addOutput(long id){
+    public void addOutputById(long id){
         if (mOutputCache != null && ready == true) {
             lastId = id;
             DatabaseOperations databaseOperations = new DatabaseOperations(getContext());
@@ -194,8 +194,29 @@ public class OutputFragment extends Fragment {
                 OutputData output = new OutputData(connectivityOutput.getDetails(), connectivityOutput.getTimestamp());
 
                 mOutputCache.add(output);
-                Log.d(LOG_TAG, "Recv msg. Cache size=" + mOutputCache.size());
+                //Log.d(LOG_TAG, "Recv msg. Cache size=" + mOutputCache.size());
                 appendOutput();
+            }
+        }
+        else{
+            Log.d(LOG_TAG, "Recv msg. Not ready");
+        }
+    }
+
+    public void addOutputByTime(String timestamp){
+        if (mOutputCache != null && ready == true) {
+            DatabaseOperations databaseOperations = new DatabaseOperations(getContext());
+            databaseOperations.openRead();
+            List<CollectedDataOutput> dataOutput = databaseOperations.getCollectedDataOutputByTime(timestamp);
+            databaseOperations.close();
+
+            if (dataOutput != null) {
+                for (CollectedDataOutput dataSet : dataOutput) {
+                    OutputData outputData = new OutputData(dataSet.getDetails(), dataSet.getTimestamp());
+                    mOutputCache.add(outputData);
+                    //Log.d(LOG_TAG, "Cache size=" + mOutputCache.size());
+                    appendOutput();
+                }
             }
         }
         else{

@@ -112,7 +112,7 @@ public class ConnectivityReceiver
                         }
                         id = insertConnEventInDB("WIFI", "CONNECTED",sb.toString());
                         sendIntentToDisplayInfo(id);
-                        Log.d(LOG_TAG, "Sent msg, id="+id);
+                        //Log.d(LOG_TAG, "Sent msg, id="+id);
                     }
                     else
                     if (!Singleton.isWifiEnabled()) {
@@ -127,7 +127,7 @@ public class ConnectivityReceiver
                         }
                         id = insertConnEventInDB("WIFI", "CONNECTED",sb.toString());
                         sendIntentToDisplayInfo(id);
-                        Log.d(LOG_TAG, "Sent msg, id="+id);
+                        //Log.d(LOG_TAG, "Sent msg, id="+id);
                     }
 
                 }
@@ -178,7 +178,7 @@ public class ConnectivityReceiver
                 displayAllInfo(intent);
 
                 String newIP = getMobileIP();
-                Log.d(LOG_TAG, "new mobile IP="+newIP);
+                //Log.d(LOG_TAG, "new mobile IP="+newIP);
 
                 if (Singleton.isMobileDataEnabled() && newIP.equals(Singleton.getMobileIP())){
                     Log.d(LOG_TAG, "Mobile Data already enabled, same IP address");
@@ -287,12 +287,12 @@ public class ConnectivityReceiver
                 if (nets[i].getState() == NetworkInfo.State.CONNECTED
                     && (nets[i].getTypeName().equals("MOBILE") || nets[i].getTypeName().equals("WIFI")))
                 {
-                    Log.v(LOG_TAG, "Connected "+nets[i].getTypeName());
-                    sb.append("Connected "+nets[i].getTypeName()).append(System.getProperty("line.separator"));
+                    //Log.v(LOG_TAG, "Connected "+nets[i].getTypeName());
+                    //sb.append("Connected "+nets[i].getTypeName()).append(System.getProperty("line.separator"));
 
 
                     if (nets[i].getType() == ConnectivityManager.TYPE_WIFI) {
-                        displayWifiInfo(context);
+                        //displayWifiInfo(context);
 
                         LinkProperties prop = connectivity.getLinkProperties(connectivity.getActiveNetwork());
                         sb.append("IP info: "+prop.toString()).append(System.getProperty("line.separator"));
@@ -376,6 +376,7 @@ public class ConnectivityReceiver
 
         }
         DhcpInfo dhcpInfo = wifiManager.getDhcpInfo();
+        Singleton.setWiFiIPGateway(intToIp(dhcpInfo.gateway));
         Log.v(LOG_TAG, "DHCP Info: "+dhcpInfo.toString());
         sb.append("DHCP Info: "+dhcpInfo.toString()).append(System.getProperty("line.separator"));
     }
@@ -393,10 +394,10 @@ public class ConnectivityReceiver
     }
 
     public String intToIp(int i) {
-        return ((i >> 24 ) & 0xFF ) + "." +
+        return (( i & 0xFF) + "." +
+                ((i >> 8 ) & 0xFF)+ "." +
                 ((i >> 16 ) & 0xFF) + "." +
-                ((i >> 8 ) & 0xFF) + "." +
-                ( i & 0xFF) ;
+                ((i >> 24 ) & 0xFF) );
     }
 
     private String getWiFiIP(Context context){
