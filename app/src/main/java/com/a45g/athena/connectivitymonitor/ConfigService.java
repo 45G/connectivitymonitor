@@ -4,15 +4,18 @@ import android.Manifest;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
+import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.telephony.CellIdentityLte;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellSignalStrengthGsm;
@@ -23,6 +26,7 @@ import android.os.Environment;
 import android.widget.Toast;
 import android.telephony.TelephonyManager;
 
+import static android.telephony.TelephonyManager.NETWORK_TYPE_LTE;
 import static com.a45g.athena.connectivitymonitor.HelperFunctions.sudoForResult;
 
 public class ConfigService extends Service {
@@ -44,6 +48,19 @@ public class ConfigService extends Service {
     private String delims = "\n";
 
     private ConnectivityReceiver connReceiver;
+
+    private BroadcastReceiver mBatInfoReceiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context ctxt, Intent intent) {
+            int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+            int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+            float batteryPct = level / (float)scale;
+            Log.d(LOG_TAG, "Level="+level+" scale="+scale+" pct="+batteryPct);
+
+            Singleton.setBattery(batteryPct);
+        }
+    };
 
 
     @Nullable
@@ -71,6 +88,8 @@ public class ConfigService extends Service {
         }
 
         registerReceivers();
+
+        getImei();
 
         periodicTasks();
     }
@@ -359,6 +378,8 @@ public class ConfigService extends Service {
         filter.setPriority(-100);
         connReceiver = new ConnectivityReceiver();
         registerReceiver(connReceiver, filter);
+
+        this.registerReceiver(this.mBatInfoReceiver, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
     }
 
     private void MPTCPCleanup(){
@@ -511,28 +532,55 @@ public class ConfigService extends Service {
         if (Singleton.isWifiEnabled()) {
             WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
             WifiInfo wifiInfo = wifiManager.getConnectionInfo();
+
             int wifiRSSI = wifiInfo.getRssi();
             Singleton.setRssi_wlan(wifiRSSI);
 
+            int wifiMCS = wifiInfo.getLinkSpeed();
+            Singleton.setMcs_wlan(wifiMCS);
+
+            int wifiFreq = wifiInfo.getFrequency();
+            Singleton.setFreq_wlan(wifiFreq);
+
             Log.d(LOG_TAG, "WiFi RSSI: " + wifiRSSI +
-                    " Link speed: " + wifiInfo.getLinkSpeed() +
-                    " Frequency: " + wifiInfo.getFrequency());
+                    " MCS: " + wifiMCS +
+                    " Frequency: " + wifiFreq);
         }
         else{
             Singleton.setRssi_wlan(0);
+            Singleton.setMcs_wlan(0);
+            Singleton.setFreq_wlan(0);
         }
 
         if (Singleton.isMobileDataEnabled()){
             TelephonyManager telephonyManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
-            CellInfoLte cellinfolte = (CellInfoLte)telephonyManager.getAllCellInfo().get(0);
-            CellSignalStrengthLte cellSignalStrengthLte = cellinfolte.getCellSignalStrength();
-            int LTERSSI = cellSignalStrengthLte.getDbm();
-            Singleton.setRssi_lte(LTERSSI);
+            if (telephonyManager.getDataNetworkType() == NETWORK_TYPE_LTE) {
+                CellInfoLte cellinfolte = (CellInfoLte) telephonyManager.getAllCellInfo().get(0);
 
-            Log.d(LOG_TAG, "LTE RSSI: " + LTERSSI);
+                CellSignalStrengthLte cellSignalStrengthLte = cellinfolte.getCellSignalStrength();
+                int LTERSSI = cellSignalStrengthLte.getDbm();
+                Singleton.setRssi_lte(LTERSSI);
+
+                Log.d(LOG_TAG, "LTE RSSI: " + LTERSSI);
+
+                CellIdentityLte  cellIdentityLte = cellinfolte.getCellIdentity();
+                int cid = cellIdentityLte.getCi();
+                Singleton.setCi_lte(cid);
+                int tac = cellIdentityLte.getTac();
+                Singleton.setTac_lte(tac);
+
+                Log.d(LOG_TAG, "LTE CID: "+cid+" TAC: "+tac);
+            }
+            else{
+                Singleton.setRssi_lte(0);
+                Singleton.setCi_lte(0);
+                Singleton.setTac_lte(0);
+            }
         }
         else{
             Singleton.setRssi_lte(0);
+            Singleton.setCi_lte(0);
+            Singleton.setTac_lte(0);
         }
     }
 
@@ -547,8 +595,13 @@ public class ConfigService extends Service {
                     Integer.toString(Singleton.getTx_lte_dif()),
                     Integer.toString(Singleton.getRssi_wlan()),
                     Integer.toString(Singleton.getRssi_lte()),
+                    Integer.toString(Singleton.getMcs_wlan()),
+                    Integer.toString(Singleton.getFreq_wlan()),
                     Float.toString(Singleton.getRtt_wlan()),
-                    Float.toString(Singleton.getRtt_lte()));
+                    Float.toString(Singleton.getRtt_lte()),
+                    Integer.toString(Singleton.getCi_lte()),
+                    Integer.toString(Singleton.getTac_lte()),
+                    Float.toString(Singleton.getBattery()));
             databaseOperations.close();
         }
         else{
@@ -556,4 +609,10 @@ public class ConfigService extends Service {
         }
     }
 
+    private void getImei(){
+        TelephonyManager telephonyManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
+
+        String imei = telephonyManager.getDeviceId();
+        Log.d(LOG_TAG, "IMEI: "+imei);
+    }
 }

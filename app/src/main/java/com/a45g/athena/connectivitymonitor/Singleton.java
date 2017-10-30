@@ -30,6 +30,12 @@ public class Singleton {
     private static float rtt_lte = 0;
     private static int rssi_wlan = 0;
     private static int rssi_lte = 0;
+    private static int mcs_wlan = 0;
+    private static int freq_wlan = 0;
+    private static int ci_lte = 0;
+    private static int tac_lte = 0;
+    private static float battery = 0;
+
 
 
     static final String LTE_SCRIPT = "/sdcard/45g/set_mptcp_lte.sh";
@@ -248,5 +254,45 @@ public class Singleton {
 
     public static void setRssi_lte(int rssi_lte) {
         Singleton.rssi_lte = rssi_lte;
+    }
+
+    public static int getMcs_wlan() {
+        return mcs_wlan;
+    }
+
+    public static void setMcs_wlan(int mcs_wlan) {
+        Singleton.mcs_wlan = mcs_wlan;
+    }
+
+    public static int getFreq_wlan() {
+        return freq_wlan;
+    }
+
+    public static void setFreq_wlan(int freq_wlan) {
+        Singleton.freq_wlan = freq_wlan;
+    }
+
+    public static int getCi_lte() {
+        return ci_lte;
+    }
+
+    public static void setCi_lte(int ci_lte) {
+        Singleton.ci_lte = ci_lte;
+    }
+
+    public static int getTac_lte() {
+        return tac_lte;
+    }
+
+    public static void setTac_lte(int tac_lte) {
+        Singleton.tac_lte = tac_lte;
+    }
+
+    public static float getBattery() {
+        return battery;
+    }
+
+    public static void setBattery(float battery) {
+        Singleton.battery = battery;
     }
 }

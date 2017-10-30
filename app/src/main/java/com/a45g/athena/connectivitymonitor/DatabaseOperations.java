@@ -33,7 +33,10 @@ public class DatabaseOperations {
             SQLiteUpdateHelper.COLUMN_RX_WLAN, SQLiteUpdateHelper.COLUMN_RX_LTE,
             SQLiteUpdateHelper.COLUMN_TX_WLAN, SQLiteUpdateHelper.COLUMN_TX_LTE,
             SQLiteUpdateHelper.COLUMN_RSSI_WLAN, SQLiteUpdateHelper.COLUMN_RSSI_LTE,
-            SQLiteUpdateHelper.COLUMN_RTT_WLAN, SQLiteUpdateHelper.COLUMN_RTT_LTE
+            SQLiteUpdateHelper.COLUMN_MCS_WLAN, SQLiteUpdateHelper.COLUMN_FREQ_WLAN,
+            SQLiteUpdateHelper.COLUMN_RTT_WLAN, SQLiteUpdateHelper.COLUMN_RTT_LTE,
+            SQLiteUpdateHelper.COLUMN_CI_LTE, SQLiteUpdateHelper.COLUMN_TAC_LTE,
+            SQLiteUpdateHelper.COLUMN_BATTERY
     };
 
     private String[] idColumn = {
@@ -119,7 +122,10 @@ public class DatabaseOperations {
 
     public long insertCollectedData(String timestamp, String rx_wlan, String rx_lte,
                                     String tx_wlan, String tx_lte, String rssi_wlan,
-                                    String rssi_lte, String rtt_wlan, String rtt_lte) {
+                                    String rssi_lte, String mcs_wlan, String freq_wlan,
+                                    String rtt_wlan, String rtt_lte,
+                                    String ci_lte, String tac_lte,
+                                    String battery) {
         if (mDatabaseUpdate == null) {
             Log.e(LOG_TAG, "Insert with database closed.");
             return -1;
@@ -133,8 +139,13 @@ public class DatabaseOperations {
         values.put(SQLiteUpdateHelper.COLUMN_TX_LTE, tx_lte);
         values.put(SQLiteUpdateHelper.COLUMN_RSSI_WLAN, rssi_wlan);
         values.put(SQLiteUpdateHelper.COLUMN_RSSI_LTE, rssi_lte);
+        values.put(SQLiteUpdateHelper.COLUMN_MCS_WLAN, mcs_wlan);
+        values.put(SQLiteUpdateHelper.COLUMN_FREQ_WLAN, freq_wlan);
         values.put(SQLiteUpdateHelper.COLUMN_RTT_WLAN, rtt_wlan);
         values.put(SQLiteUpdateHelper.COLUMN_RTT_LTE, rtt_lte);
+        values.put(SQLiteUpdateHelper.COLUMN_CI_LTE, ci_lte);
+        values.put(SQLiteUpdateHelper.COLUMN_TAC_LTE, tac_lte);
+        values.put(SQLiteUpdateHelper.COLUMN_BATTERY, battery);
 
         return mDatabaseUpdate.insert(SQLiteUpdateHelper.TABLE_COLLECTED_DATA, null, values);
     }
@@ -387,6 +398,8 @@ public class DatabaseOperations {
     private CollectedDataOutput cursorToCollectedDataOutput(Cursor cursor) {
         return new CollectedDataOutput(cursor.getLong(0), cursor.getString(1), cursor.getString(2),
                 cursor.getString(3), cursor.getString(4), cursor.getString(5), cursor.getString(6),
-                cursor.getString(7), cursor.getString(8), cursor.getString(9));
+                cursor.getString(7), cursor.getString(8), cursor.getString(9), cursor.getString(10),
+                cursor.getString(11), cursor.getString(12), cursor.getString(13),
+                cursor.getString(14));
     }
 }

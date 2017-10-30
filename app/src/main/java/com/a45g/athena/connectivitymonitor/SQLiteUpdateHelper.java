@@ -32,8 +32,16 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
     public static final String COLUMN_RSSI_WLAN = "rssi_wlan";
     public static final String COLUMN_RSSI_LTE = "rssi_lte";
 
+    public static final String COLUMN_MCS_WLAN = "mcs_wlan";
+    public static final String COLUMN_FREQ_WLAN = "freq_wlan";
+
     public static final String COLUMN_RTT_WLAN = "rtt_wlan";
     public static final String COLUMN_RTT_LTE = "rtt_lte";
+
+    public static final String COLUMN_CI_LTE = "ci_lte";
+    public static final String COLUMN_TAC_LTE = "tac_lte";
+
+    public static final String COLUMN_BATTERY = "battery";
 
 
     private static final String CONNECTIVITY_CREATE = "CREATE TABLE IF NOT EXISTS "
@@ -61,8 +69,13 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
             + COLUMN_TX_LTE + " string not null, "
             + COLUMN_RSSI_WLAN + " string not null, "
             + COLUMN_RSSI_LTE + " string not null, "
+            + COLUMN_MCS_WLAN + " string not null, "
+            + COLUMN_FREQ_WLAN + " string not null, "
             + COLUMN_RTT_WLAN + " string not null, "
-            + COLUMN_RTT_LTE + " string not null);";
+            + COLUMN_RTT_LTE + " string not null, "
+            + COLUMN_CI_LTE + " string not null, "
+            + COLUMN_TAC_LTE + " string not null, "
+            + COLUMN_BATTERY + " string not null);";
 
 
     public SQLiteUpdateHelper(Context context) {
