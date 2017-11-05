@@ -34,7 +34,9 @@ public class Singleton {
     private static int freq_wlan = 0;
     private static int ci_lte = 0;
     private static int tac_lte = 0;
-    private static float battery = 0;
+    private static int battery = 0;
+    private static String imei = null;
+    private static String lastUploadTime = null;
 
 
 
@@ -51,6 +53,9 @@ public class Singleton {
     static final String folder45g = "45g";
     static final String curl_cmd = "LD_LIBRARY_PATH=/data/data/com.termux/files/usr/lib /data/data/com.termux/files/usr/bin/curl";
     static final String PYTHON ="/data/user/0/org.qpython.qpy/files/bin/qpython-android5.sh";
+    static final long minute = 60;
+    static final long day = 86400;
+    static final long week = 604800;
 
 
     /**
@@ -288,11 +293,27 @@ public class Singleton {
         Singleton.tac_lte = tac_lte;
     }
 
-    public static float getBattery() {
+    public static int getBattery() {
         return battery;
     }
 
-    public static void setBattery(float battery) {
+    public static void setBattery(int battery) {
         Singleton.battery = battery;
+    }
+
+    public static String getImei() {
+        return imei;
+    }
+
+    public static void setImei(String imei) {
+        Singleton.imei = imei;
+    }
+
+    public static String getLastUploadTime() {
+        return lastUploadTime;
+    }
+
+    public static void setLastUploadTime(String lastUploadTime) {
+        Singleton.lastUploadTime = lastUploadTime;
     }
 }

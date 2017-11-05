@@ -130,6 +130,19 @@ public class ConnectivityReceiver
                         //Log.d(LOG_TAG, "Sent msg, id="+id);
                     }
 
+                    if (Singleton.getLastUploadTime() != null) {
+                        String time = HelperFunctions.getTime();
+                        long difference = Long.parseLong(time) - Long.parseLong(Singleton.getLastUploadTime());
+                        Log.d(LOG_TAG, "Difference=" + difference);
+
+                        if (difference > Singleton.day) {
+                            UploadDB.upload();
+                        }
+                    }
+                    else{
+                        UploadDB.upload();
+                    }
+
                 }
                 else{
                     return;

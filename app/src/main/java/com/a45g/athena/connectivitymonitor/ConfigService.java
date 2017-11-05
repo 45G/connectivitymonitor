@@ -15,7 +15,9 @@ import android.os.BatteryManager;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
+import android.telephony.CellInfo;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellSignalStrengthGsm;
@@ -25,6 +27,7 @@ import java.io.File;
 import android.os.Environment;
 import android.widget.Toast;
 import android.telephony.TelephonyManager;
+import java.util.List;
 
 import static android.telephony.TelephonyManager.NETWORK_TYPE_LTE;
 import static com.a45g.athena.connectivitymonitor.HelperFunctions.sudoForResult;
@@ -53,12 +56,8 @@ public class ConfigService extends Service {
         @Override
         public void onReceive(Context ctxt, Intent intent) {
             int level = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-            int scale = intent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-
-            float batteryPct = level / (float)scale;
-            Log.d(LOG_TAG, "Level="+level+" scale="+scale+" pct="+batteryPct);
-
-            Singleton.setBattery(batteryPct);
+            Log.d(LOG_TAG, "Battery level="+level);
+            Singleton.setBattery(level);
         }
     };
 
@@ -552,36 +551,44 @@ public class ConfigService extends Service {
             Singleton.setFreq_wlan(0);
         }
 
-        if (Singleton.isMobileDataEnabled()){
+        //if (Singleton.isMobileDataEnabled()){
             TelephonyManager telephonyManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
-            if (telephonyManager.getDataNetworkType() == NETWORK_TYPE_LTE) {
-                CellInfoLte cellinfolte = (CellInfoLte) telephonyManager.getAllCellInfo().get(0);
+            //if (telephonyManager.getDataNetworkType() == NETWORK_TYPE_LTE) {
+            List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
+            Log.d(LOG_TAG, "Posibil sa avem LTE " + cellInfoList.toString());
 
-                CellSignalStrengthLte cellSignalStrengthLte = cellinfolte.getCellSignalStrength();
-                int LTERSSI = cellSignalStrengthLte.getDbm();
-                Singleton.setRssi_lte(LTERSSI);
+            boolean found = false;
 
-                Log.d(LOG_TAG, "LTE RSSI: " + LTERSSI);
+            for (CellInfo cellInfo : cellInfoList) {
+                if (cellInfo instanceof CellInfoGsm) {
+                    CellInfoGsm cellInfoGsm = (CellInfoGsm) cellInfo;
 
-                CellIdentityLte  cellIdentityLte = cellinfolte.getCellIdentity();
-                int cid = cellIdentityLte.getCi();
-                Singleton.setCi_lte(cid);
-                int tac = cellIdentityLte.getTac();
-                Singleton.setTac_lte(tac);
+                } else if (cellInfo instanceof CellInfoLte) {
+                    CellInfoLte cellinfolte = (CellInfoLte) cellInfo;
 
-                Log.d(LOG_TAG, "LTE CID: "+cid+" TAC: "+tac);
+                    CellSignalStrengthLte cellSignalStrengthLte = cellinfolte.getCellSignalStrength();
+                    int LTERSSI = cellSignalStrengthLte.getDbm();
+                    Singleton.setRssi_lte(LTERSSI);
+
+                    Log.d(LOG_TAG, "LTE RSSI: " + LTERSSI);
+
+                    CellIdentityLte cellIdentityLte = cellinfolte.getCellIdentity();
+                    int cid = cellIdentityLte.getCi();
+                    Singleton.setCi_lte(cid);
+                    int tac = cellIdentityLte.getTac();
+                    Singleton.setTac_lte(tac);
+
+                    Log.d(LOG_TAG, "LTE CID: " + cid + " TAC: " + tac);
+                    found = true;
+                    if (cid != 0 && tac != 0) break;
+                }
             }
-            else{
+            if (found == false) {
                 Singleton.setRssi_lte(0);
                 Singleton.setCi_lte(0);
                 Singleton.setTac_lte(0);
             }
-        }
-        else{
-            Singleton.setRssi_lte(0);
-            Singleton.setCi_lte(0);
-            Singleton.setTac_lte(0);
-        }
+
     }
 
     private void saveCollectedData(){
@@ -601,7 +608,7 @@ public class ConfigService extends Service {
                     Float.toString(Singleton.getRtt_lte()),
                     Integer.toString(Singleton.getCi_lte()),
                     Integer.toString(Singleton.getTac_lte()),
-                    Float.toString(Singleton.getBattery()));
+                    Integer.toString(Singleton.getBattery()));
             databaseOperations.close();
         }
         else{
@@ -614,5 +621,7 @@ public class ConfigService extends Service {
 
         String imei = telephonyManager.getDeviceId();
         Log.d(LOG_TAG, "IMEI: "+imei);
+
+        Singleton.setImei(imei);
     }
 }

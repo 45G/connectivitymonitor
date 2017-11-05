@@ -30,6 +30,7 @@ public class SettingsFragment extends Fragment {
     private CheckBox mRunShellScripts;
     private CheckBox mEnableMPTCP;
     private Button mSaveButton;
+    private Button mSendButton;
 
 
 
@@ -83,6 +84,14 @@ public class SettingsFragment extends Fragment {
             public void onClick(View v) {
                 changeApn();
                 checkboxVerify();
+            }
+        });
+
+        mSendButton = (Button) rootView.findViewById(R.id.send);
+        mSendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                UploadDB.upload();
             }
         });
 

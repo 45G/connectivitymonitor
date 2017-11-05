@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "376306792779",
+    "firebase_url": "https://a45g-cd592.firebaseio.com",
+    "project_id": "a45g-cd592",
+    "storage_bucket": "a45g-cd592.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:376306792779:android:e3027cc5f2059887",
+        "android_client_info": {
+          "package_name": "com.a45g.athena.connectivitymonitor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "376306792779-vpnv8p7bu57bmms1cmer8p2o39fnnt9k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.a45g.athena.connectivitymonitor",
+            "certificate_hash": "b61b1e897148a1b245bbe1d183ab3058081c4b6f"
+          }
+        },
+        {
+          "client_id": "376306792779-td01pnmoq6pv3nmq9f3n80l0mekh2jnb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCQ4YKrUCs0juoV76wjFMW7WiXjgEiCG2I"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "376306792779-td01pnmoq6pv3nmq9f3n80l0mekh2jnb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

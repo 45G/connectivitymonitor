@@ -9,7 +9,8 @@
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:weightSum="1">
 
         <CheckBox
             android:text="Enable MPTCP [requires ROOT]"
@@ -41,10 +42,17 @@
             android:id="@+id/apn_to_watch" />
 
         <Button
-            android:text="Save"
-            android:layout_width="100dp"
+            android:text="Save settings"
+            android:layout_width="160dp"
             android:layout_height="59dp"
-            android:id="@+id/save" />
+            android:id="@+id/save"
+            android:layout_weight="0.04" />
+
+        <Button
+            android:text="Send database"
+            android:layout_width="160dp"
+            android:layout_height="59dp"
+            android:id="@+id/send" />
     </LinearLayout>
 
 
