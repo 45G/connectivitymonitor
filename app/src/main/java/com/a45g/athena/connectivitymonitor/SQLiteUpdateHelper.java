@@ -11,7 +11,6 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "connectivitymonitor.db";
     private static final int DATABASE_VERSION = 1;
 
-
     public static final String TABLE_CONNECTIVITY = "connectivity_events";
     public static final String COLUMN_ID = "_id";
     public static final String COLUMN_TIMESTAMP = "timestamp";
@@ -42,6 +41,8 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
     public static final String COLUMN_TAC_LTE = "tac_lte";
 
     public static final String COLUMN_BATTERY = "battery";
+
+    public static final String TABLE_DEVICE_INFO = "device_info";
 
 
     private static final String CONNECTIVITY_CREATE = "CREATE TABLE IF NOT EXISTS "
@@ -77,6 +78,11 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
             + COLUMN_TAC_LTE + " string not null, "
             + COLUMN_BATTERY + " string not null);";
 
+    private static final String DEVICE_INFO_CREATE = "CREATE TABLE IF NOT EXISTS "
+            + TABLE_DEVICE_INFO + "("
+            + COLUMN_ID + " integer primary key autoincrement, "
+            + COLUMN_TYPE + " string not null, "
+            + COLUMN_VALUE + " string not null);";
 
     public SQLiteUpdateHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -98,12 +104,20 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
         database.execSQL("DROP TABLE IF EXISTS " + TABLE_TESTS);
     }
 
-    public void createBytes(SQLiteDatabase database) {
+    public void createCollectedData(SQLiteDatabase database) {
         database.execSQL(COLLECTED_DATA_CREATE);
     }
 
-    public void deleteBytes(SQLiteDatabase database) {
+    public void deleteCollectedData(SQLiteDatabase database) {
         database.execSQL("DROP TABLE IF EXISTS " + TABLE_COLLECTED_DATA);
+    }
+
+    public void createDeviceInfo(SQLiteDatabase database) {
+        database.execSQL(DEVICE_INFO_CREATE);
+    }
+
+    public void deleteDeviceInfo(SQLiteDatabase database) {
+        database.execSQL("DROP TABLE IF EXISTS " + TABLE_DEVICE_INFO);
     }
 
     @Override
@@ -112,7 +126,8 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
 
         createConnectivity(database);
         createTests(database);
-        createBytes(database);
+        createCollectedData(database);
+        createDeviceInfo(database);
     }
 
     public void onDelete(SQLiteDatabase database) {
@@ -120,7 +135,8 @@ public class SQLiteUpdateHelper extends SQLiteOpenHelper {
 
         deleteConnectivity(database);
         deleteTests(database);
-        deleteBytes(database);
+        deleteCollectedData(database);
+        deleteDeviceInfo(database);
     }
 
     @Override

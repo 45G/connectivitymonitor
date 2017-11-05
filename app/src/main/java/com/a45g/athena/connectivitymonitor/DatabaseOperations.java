@@ -39,8 +39,17 @@ public class DatabaseOperations {
             SQLiteUpdateHelper.COLUMN_BATTERY
     };
 
+    private String[] allDeviceInfoColumns = {
+            SQLiteUpdateHelper.COLUMN_ID,
+            SQLiteUpdateHelper.COLUMN_TYPE, SQLiteUpdateHelper.COLUMN_VALUE
+    };
+
     private String[] idColumn = {
             SQLiteUpdateHelper.COLUMN_ID
+    };
+
+    private String[] valueColumn = {
+            SQLiteUpdateHelper.COLUMN_VALUE
     };
 
     public DatabaseOperations(Context context) {
@@ -148,6 +157,19 @@ public class DatabaseOperations {
         values.put(SQLiteUpdateHelper.COLUMN_BATTERY, battery);
 
         return mDatabaseUpdate.insert(SQLiteUpdateHelper.TABLE_COLLECTED_DATA, null, values);
+    }
+
+    public long insertDeviceInfo(String type, String value) {
+        if (mDatabaseUpdate == null) {
+            Log.e(LOG_TAG, "Insert with database closed.");
+            return -1;
+        }
+
+        ContentValues values = new ContentValues();
+        values.put(SQLiteUpdateHelper.COLUMN_TYPE, type);
+        values.put(SQLiteUpdateHelper.COLUMN_VALUE, value);
+
+        return mDatabaseUpdate.insert(SQLiteUpdateHelper.TABLE_DEVICE_INFO, null, values);
     }
 
     public List<ConnectivityOutput> getAllConnectivityOutputs() {
@@ -388,6 +410,36 @@ public class DatabaseOperations {
         }
 
         return outputs;
+    }
+
+    public String getDeviceInfo(String type) {
+        if (mDatabaseUpdate == null) {
+            Log.e(LOG_TAG, "getDeviceInfo: Query with database closed.");
+            return null;
+        }
+
+
+        String whereClause = SQLiteUpdateHelper.COLUMN_TYPE + " = '" + type + "'";
+        Cursor cursor = mDatabaseUpdate.query(SQLiteUpdateHelper.TABLE_DEVICE_INFO,
+                valueColumn, whereClause, null, null, null, null);
+
+        String value = null;
+
+
+        try {
+            if (cursor != null) {
+                if (cursor.getCount() > 0) {
+                    cursor.moveToLast();
+                    value = cursor.getString(0);
+                }
+            }
+        } finally {
+            if (cursor != null){
+                cursor.close();
+            }
+        }
+
+        return value;
     }
 
     private TestOutput cursorToTestOutput(Cursor cursor) {

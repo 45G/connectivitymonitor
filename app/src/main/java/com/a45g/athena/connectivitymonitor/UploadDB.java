@@ -26,7 +26,7 @@ public class UploadDB {
         final String uploadTime = HelperFunctions.getTime();
 
         Uri file = Uri.fromFile(
-                new File("/sdcard/connectivitymonitor.db"));
+                new File("/data/data/com.a45g.athena.connectivitymonitor/databases/connectivitymonitor.db"));
         StorageReference storageReference =
                 mStorageRef.child("databases/"+Singleton.getImei()+"/"+uploadTime+".db");
 

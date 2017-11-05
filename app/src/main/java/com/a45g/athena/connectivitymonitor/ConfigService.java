@@ -12,6 +12,7 @@ import android.net.ConnectivityManager;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
@@ -88,7 +89,8 @@ public class ConfigService extends Service {
 
         registerReceivers();
 
-        getImei();
+        getAllDeviceInfo();
+        getDeviceInfo();
 
         periodicTasks();
     }
@@ -616,12 +618,45 @@ public class ConfigService extends Service {
         }
     }
 
-    private void getImei(){
+    private void getDeviceInfo(){
         TelephonyManager telephonyManager = (TelephonyManager)this.getSystemService(Context.TELEPHONY_SERVICE);
 
         String imei = telephonyManager.getDeviceId();
         Log.d(LOG_TAG, "IMEI: "+imei);
 
         Singleton.setImei(imei);
+
+        String model = Build.MODEL;
+        String device = Build.DEVICE;
+        String version = Build.VERSION.INCREMENTAL;
+
+        Log.d(LOG_TAG, "Model="+model+" Device="+device+" Version="+version);
+
+        DatabaseOperations databaseOperations = new DatabaseOperations(getApplicationContext());
+        databaseOperations.openWrite();
+        String previousImei = databaseOperations.getDeviceInfo("imei");
+
+        if (previousImei == null){
+            databaseOperations.insertDeviceInfo("imei", imei);
+            databaseOperations.insertDeviceInfo("model", model);
+            databaseOperations.insertDeviceInfo("device", device);
+            databaseOperations.insertDeviceInfo("version", version);
+            Log.d(LOG_TAG, "Saved device info");
+        }
+        else if (previousImei.equals(imei)){
+            Log.d(LOG_TAG, "Same device info, already saved");
+        }
+
+        databaseOperations.close();
+    }
+
+    private void getAllDeviceInfo(){
+        String s="Debug-infos:\n";
+        s += "OS Version: " + System.getProperty("os.version") + "(" + android.os.Build.VERSION.INCREMENTAL + ")\n";
+        s += "OS API Level: " + android.os.Build.VERSION.RELEASE + "(" + android.os.Build.VERSION.SDK_INT + ")\n";
+        s += "Device: " + android.os.Build.DEVICE + "\n";
+        s += "Model (and Product): " + android.os.Build.MODEL + " ("+ android.os.Build.PRODUCT + ")\n";
+
+        Log.d(LOG_TAG, s);
     }
 }
