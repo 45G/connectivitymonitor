@@ -15,14 +15,14 @@ public class Singleton {
     private static boolean mScriptsNeeded = true;
     private static String mApn = "land";
     private static boolean mMPTCPNeeded = true;
-    private static int rx_wlan = 0;
-    private static int rx_lte = 0;
-    private static int tx_wlan = 0;
-    private static int tx_lte = 0;
-    private static int rx_wlan_dif = 0;
-    private static int rx_lte_dif = 0;
-    private static int tx_wlan_dif = 0;
-    private static int tx_lte_dif = 0;
+    private static long rx_wlan = 0;
+    private static long rx_lte = 0;
+    private static long tx_wlan = 0;
+    private static long tx_lte = 0;
+    private static long rx_wlan_dif = 0;
+    private static long rx_lte_dif = 0;
+    private static long tx_wlan_dif = 0;
+    private static long tx_lte_dif = 0;
     public static boolean empty_bytes = true;
     private static String mWiFiIPGateway = null;
     private static String mLTEIPGateway = null;
@@ -149,35 +149,35 @@ public class Singleton {
         mMPTCPNeeded = MPTCPNeeded;
     }
 
-    public static int getRxWlan() {
+    public static long getRxWlan() {
         return rx_wlan;
     }
 
-    public static void setRxWlan(int rx_wlan) {
+    public static void setRxWlan(long rx_wlan) {
         Singleton.rx_wlan = rx_wlan;
     }
 
-    public static int getRxLte() {
+    public static long getRxLte() {
         return rx_lte;
     }
 
-    public static void setRxLte(int rx_lte) {
+    public static void setRxLte(long rx_lte) {
         Singleton.rx_lte = rx_lte;
     }
 
-    public static int getTxWlan() {
+    public static long getTxWlan() {
         return tx_wlan;
     }
 
-    public static void setTxWlan(int tx_wlan) {
+    public static void setTxWlan(long tx_wlan) {
         Singleton.tx_wlan = tx_wlan;
     }
 
-    public static int getTxLte() {
+    public static long getTxLte() {
         return tx_lte;
     }
 
-    public static void setTxLte(int tx_lte) {
+    public static void setTxLte(long tx_lte) {
         Singleton.tx_lte = tx_lte;
     }
 
@@ -213,35 +213,35 @@ public class Singleton {
         Singleton.rtt_lte = rtt_lte;
     }
 
-    public static int getRx_wlan_dif() {
+    public static long getRx_wlan_dif() {
         return rx_wlan_dif;
     }
 
-    public static void setRx_wlan_dif(int rx_wlan_dif) {
+    public static void setRx_wlan_dif(long rx_wlan_dif) {
         Singleton.rx_wlan_dif = rx_wlan_dif;
     }
 
-    public static int getRx_lte_dif() {
+    public static long getRx_lte_dif() {
         return rx_lte_dif;
     }
 
-    public static void setRx_lte_dif(int rx_lte_dif) {
+    public static void setRx_lte_dif(long rx_lte_dif) {
         Singleton.rx_lte_dif = rx_lte_dif;
     }
 
-    public static int getTx_wlan_dif() {
+    public static long getTx_wlan_dif() {
         return tx_wlan_dif;
     }
 
-    public static void setTx_wlan_dif(int tx_wlan_dif) {
+    public static void setTx_wlan_dif(long tx_wlan_dif) {
         Singleton.tx_wlan_dif = tx_wlan_dif;
     }
 
-    public static int getTx_lte_dif() {
+    public static long getTx_lte_dif() {
         return tx_lte_dif;
     }
 
-    public static void setTx_lte_dif(int tx_lte_dif) {
+    public static void setTx_lte_dif(long tx_lte_dif) {
         Singleton.tx_lte_dif = tx_lte_dif;
     }
 

@@ -429,15 +429,15 @@ public class ConfigService extends Service {
         String[] tokens2 = tokens1[0].split(" ");
 
         String timestamp = tokens2[0];
-        int rx_wlan = Integer.parseInt(tokens2[1]);
-        int rx_lte = Integer.parseInt(tokens2[2]);
-        int tx_wlan = Integer.parseInt(tokens2[3]);
-        int tx_lte = Integer.parseInt(tokens2[4]);
+        long rx_wlan = Long.parseLong(tokens2[1]);
+        long rx_lte = Long.parseLong(tokens2[2]);
+        long tx_wlan = Long.parseLong(tokens2[3]);
+        long tx_lte = Long.parseLong(tokens2[4]);
 
-        int rx_wlan_dif = 0;
-        int rx_lte_dif = 0;
-        int tx_wlan_dif = 0;
-        int tx_lte_dif = 0;
+        long rx_wlan_dif = 0;
+        long rx_lte_dif = 0;
+        long tx_wlan_dif = 0;
+        long tx_lte_dif = 0;
 
         if (!Singleton.empty_bytes) {
             rx_wlan_dif = rx_wlan - Singleton.getRxWlan();
@@ -598,10 +598,10 @@ public class ConfigService extends Service {
             DatabaseOperations databaseOperations = new DatabaseOperations(getApplicationContext());
             databaseOperations.openWrite();
             databaseOperations.insertCollectedData(timestamp,
-                    Integer.toString(Singleton.getRx_wlan_dif()),
-                    Integer.toString(Singleton.getRx_lte_dif()),
-                    Integer.toString(Singleton.getTx_wlan_dif()),
-                    Integer.toString(Singleton.getTx_lte_dif()),
+                    Long.toString(Singleton.getRx_wlan_dif()),
+                    Long.toString(Singleton.getRx_lte_dif()),
+                    Long.toString(Singleton.getTx_wlan_dif()),
+                    Long.toString(Singleton.getTx_lte_dif()),
                     Integer.toString(Singleton.getRssi_wlan()),
                     Integer.toString(Singleton.getRssi_lte()),
                     Integer.toString(Singleton.getMcs_wlan()),
